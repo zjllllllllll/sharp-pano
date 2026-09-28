@@ -1,0 +1,57 @@
+# Local installations, credentials, models and generated data
+.envs/
+.runtime/
+.cache/
+cache/
+models/*
+!models/README.md
+!models/manifest.json
+config.local.cmd
+config.local.json
+.env
+.env.*
+!.env.example
+*-key.txt
+*_api_key.txt
+secrets/
+**/runs/
+**/node_modules/
+**/__pycache__/
+**/.pytest_cache/
+*.pyc
+*.log
+*.pt
+*.safetensors
+*.npy
+*.npz
+*.ply
+*.las
+*.bin
+# Historical model checkouts and experiments; release uses third_party/
+/DepthMaster/
+/ml-sharp/
+/UniSHARP/
+/repos/
+/depth-benchmark/
+/pano-tests/
+/depthmaster-results/
+/sharp-sixface-results/
+/dependency-audit/snapshot.json
+/pano-web/diagnostics/
+/pano-web/.runtime/
+/pano-web/*.png
+/room-outline-experiment/.deps/
+/room-outline-experiment/.render-deps/
+**/.git/
+
+# Leftover interactive-shell outputs, not application source
+/e.name.includes(.ply)).length})
+/pano-web/e.id)
+/pano-web/innerWidth
+/room-outline-experiment/publish-inset-0p5.ps1
+
+# Local scene inspection artifacts
+/room-outline-experiment/*.png
+/room-outline-experiment/development/
+/room-outline-experiment/edge-fix-checks/
+/scripts/vendor_local_dependencies.py

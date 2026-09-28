@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SHARP · 效果验证与调试</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/debug.css"><link rel="stylesheet" href="/novel.css">
+  <script type="importmap">{"imports":{"three":"/vendor/three/build/three.module.js","three/addons/":"/vendor/three/examples/jsm/","@sparkjsdev/spark":"/vendor/@sparkjsdev/spark/dist/spark.module.js"}}</script>
+</head>
+<body>
+  <header><div class="brand"><span class="mark">S</span><strong>SHARP <span>效果验证与调试</span></strong></div><span id="health">检查本机模型…</span></header>
+  <main>
+    <aside>
+      <div class="section-label">PIPELINE <span id="pipeline-summary">13 个步骤 · 2 轮修补</span></div>
+      <nav id="steps" aria-label="生成步骤">
+        <details id="initial-stage-group" open>
+          <summary>首次生成 <span id="initial-stage-status">01—05</span></summary>
+          <div id="initial-steps" class="step-list" aria-label="首次生成步骤"></div>
+        </details>
+        <section class="repair-loop" aria-label="循环修补">
+          <div class="repair-loop-heading"><span aria-hidden="true">↻</span>循环修补</div>
+          <div class="repair-round-control"><label for="repair-round">查看轮次</label><select id="repair-round"></select></div>
+          <p id="repair-round-status" role="status"></p>
+          <div class="repair-loop-track"><div class="repair-loop-return" aria-hidden="true"></div><div id="repair-steps" class="step-list" aria-label="本轮四个步骤"></div></div>
+          <p class="repair-loop-feedback">累计合并结果 → 下一轮候选相机</p>
+          <p id="pipeline-running" role="status" hidden></p>
+        </section>
+        <div class="pipeline-current"><span>当前查看</span><p id="pipeline-current-step" role="status">STEP 01 · 首次生成 · 全景图</p></div>
+      </nav>
+      <a href="http://127.0.0.1:8769/camera-lab" target="camera-sampling-lab" rel="noopener" style="display:block;margin:18px 0;padding:12px;border:1px solid #42533b;border-radius:6px;color:#c6f585;text-decoration:none;font-size:13px">相机采样实验 ↗<span style="display:block;color:#91a28c;font-size:11px;margin-top:5px">独立栏目 · 固定 15% / 连通候选 / 全景预览</span></a>
+      <div class="upload-card" id="drop"><div class="upload-icon">＋</div><strong>上传一张全景图</strong><p>2:1 全景 · PNG / JPG / WebP<br>文件不超过 80 MB</p><label class="upload-button" for="file">选择图片</label><input id="file" type="file" accept="image/png,image/jpeg,image/webp"><span id="upload-status" role="status">也可以将图片拖到这里</span></div>
+      <div class="local-note">前六步与第八、九步本地运行<br>第七步：云端图片修复<br>Seedream / GPT 公司 API 测试<br>第九步：SHARP 深度锚定补丁</div>
+    </aside>
+    <section class="workspace">
+      <p id="branch-info" class="novel-privacy" hidden></p>
+      <div class="view-heading"><div><div class="eyebrow" id="step-index">STEP 01</div><h1 id="title">全景图</h1></div><a id="download" class="secondary" hidden>下载结果 ↗</a></div>
+      <section id="gaussian-repair-control" class="normal-panel" hidden aria-label="高斯补洞结果切换"><div class="novel-actions"><button id="repair-base" aria-pressed="false">原始高斯</button><button id="repair-patch" aria-pressed="false">仅新增补丁</button><button id="repair-merged" aria-pressed="true">合并后</button></div><p id="gaussian-repair-status" role="status"></p></section>
+      <div class="viewport" id="viewport">
+        <div id="empty"><div class="empty-symbol">◉</div><h2>从一张全景图开始</h2><p>上传后，逐步查看深度、点云和高斯的变化</p></div>
+        <div id="image-view" hidden><img id="result-image" alt="当前步骤结果" draggable="false"></div>
+        <div id="three-view" hidden tabindex="0" aria-label="三维结果，拖动环视，WASD 移动"></div>
+        <div id="view-loading" hidden role="status">正在载入三维结果…</div>
+        <div class="view-toolbar" id="view-tools" hidden><button id="reset">重置视角</button><button id="gray" hidden>切换灰度</button><label id="point-control" hidden>点大小 <input id="point-size" type="range" min="1" max="5" step="0.5" value="2"><select id="point-density" aria-label="点云预览密度"><option value="full">全量点云</option><option value="sample">1/16 抽样</option></select></label></div>
+        <div id="view-hint" class="view-hint"></div>
+      </div>
+      <section id="novel-panel" hidden aria-label="候选相机选择"><strong>候选相机 · 全局四邻域</strong><p id="novel-status"></p><div class="novel-actions"><select id="novel-picker" aria-label="候选相机"></select><button id="novel-render">渲染此相机</button><button id="novel-highlight">移动到此相机</button></div><p>黄色：本轮推荐；蓝色：已选；绿色：四邻域。点击空间中的编号会现场渲染高斯，不使用点云颜色预览；点击不改变已选集合。</p><p class="novel-privacy">进入下一步会确认推荐相机，六面逐面补洞：每次只向火山方舟 Seedream 发送一张 1024×1024 待补图，不发送参考图。只补图，暂不回写高斯。</p></section>
+      <section id="repair-panel" hidden aria-label="六面补洞与全景融合"></section>
+      <section id="normal-control" aria-label="点云法向夹角筛选" hidden>
+        <div class="mask-heading point-mask-heading"><strong>点云 Mask 对比</strong><div class="mask-switch" role="group" aria-label="点云 Mask 结果切换"><button id="point-mask-before" aria-pressed="false">Mask 前 · 原始</button><button id="point-mask-after" aria-pressed="true">Mask 后 · 已筛选</button></div></div>
+        <div class="normal-heading"><strong>① 法向夹角筛选</strong><span class="filter-badge">固定 82°</span></div>
+        <div id="normal-status" role="status">载入点云后估计法向…</div><button id="normal-retry" hidden>重试法向计算</button>
+        <div class="distance-heading"><strong>② 平均近邻距离筛选 · 单轮</strong><span class="filter-badge">固定 64 个邻居 · 15 cm</span></div>
+        <div id="distance-status" role="status">等待法向筛选完成…</div><button id="distance-retry" hidden>重试距离计算</button>
+        <p id="distance-help">先删除法向夹角大于 82° 的点，再在剩余点中查询 64 个近邻（不含自身），删除平均距离大于 15 cm 的点。法向不可靠的点也参与距离筛选；抽样使用全量距离。</p>
+        <p id="normal-help">两轮删除结果合为同一份 Mask，按原始面 / 层 / 像素索引传递给后面两步高斯，不按移动后的位置重新匹配。原始 LAS 保留不变。</p>
+      </section>
+      <section id="densify-control" aria-label="点云加密前后对比" hidden>
+        <div class="mask-heading"><strong>③ 距离自适应加密</strong><div class="mask-switch" role="group" aria-label="点云加密结果切换"><button id="densify-before" aria-pressed="true">加密前</button><button id="densify-after" aria-pressed="false">加密后</button></div></div>
+        <p id="densify-status" role="status">点击“加密后”生成预览；不重新运行模型。</p>
+        <p class="mask-help">2 米起按距离平方分配采样，局部最多 4 倍，总新增不超过 Mask 后点数的 25%；仅细分间距超过 7.5 mm 的连续区域，不跨面、不跨层、不跨已删除点插值。</p>
+        <p class="mask-help">两种加密视图均以 Mask 后点云为基准，切换保持视角和点大小。切回 Mask 前会关闭加密。相同的新增点索引接入后续两步高斯；新增点来自深度插值，不代表新观测。此处下载仍为原始 LAS。</p>
+      </section>
+      <section id="gaussian-densify-control" aria-label="高斯加密前后对比" hidden>
+        <div class="mask-heading"><strong>高斯加密对比 · Mask 后</strong><div class="mask-switch" role="group" aria-label="高斯加密结果切换"><button id="gaussian-dense-before" aria-pressed="true">加密前</button><button id="gaussian-dense-after" aria-pressed="false">加密后</button></div><button id="gaussian-dense-build" hidden>生成本步加密对比</button></div>
+        <p id="gaussian-dense-status" role="status"></p><p class="mask-help">纯追加，不缩小原高斯。新增高斯的尺度、旋转、颜色和透明度直接继承同面、同层、索引对应原像素的父高斯。初始化中心沿用加密点云；调整后的中心加上父高斯的位移。下载 PLY 对应当前版本。</p>
+      </section>
+      <p id="preload-status" role="status" class="mask-help">结果按需加载，随后预加载其它已完成步骤。</p>
+      <section id="gaussian-mask-control" aria-label="高斯 Mask 前后对比" hidden>
+        <div class="mask-heading"><strong>高斯 Mask 对比</strong><div class="mask-switch" role="group" aria-label="Mask 结果切换"><button id="mask-before" aria-pressed="false">Mask 前 · 原始</button><button id="mask-after" aria-pressed="true">Mask 后 · 已筛选</button></div><button id="mask-build" hidden>生成本步 Mask 对比</button></div>
+        <p id="mask-status" role="status"></p><p class="mask-help">固定 82° / 64 邻居 / 15 cm；切换保留当前视角，下载 PLY 对应当前选中的版本。Mask 后的 PLY 已实际剔除对应高斯，并非仅在网页隐藏。</p>
+      </section>
+      <div class="details"><p id="description">原五步生成链路之后，继续选择候选相机、预览并完成六面补洞。各步结果都会保留。</p><div id="metrics"></div></div>
+      <div id="compare-tools" hidden><span>三维步骤切换保持同一视角</span><select id="direction" aria-label="固定观察方向"><option value="front">前</option><option value="right">右</option><option value="back">后</option><option value="left">左</option><option value="up">上</option><option value="down">下</option></select><label>FOV <input id="fov" type="number" min="30" max="120" value="75" aria-label="预览视场角"></label><button id="save-pose">保存视角</button><button id="restore-pose" disabled>恢复视角</button><button id="compare" disabled>切换初始 / 调整</button></div>
+      <details id="debug-panel"><summary>调试信息 · 本步参数 / 数值诊断 / 日志</summary><div class="debug-actions"><button id="refresh-debug">刷新本步日志</button><button id="running-debug">查看正在运行的日志</button><button id="download-debug">下载调试记录</button></div><pre id="debug-data">上传图片后，可在这里查看每一步的实际参数和日志。</pre></details>
+      <div class="bottom"><div class="progress-area"><div id="progress-label" role="status">等待上传全景图</div><progress id="progress" max="13" value="0"></progress></div><button id="next" class="primary" disabled>生成下一步 →</button></div>
+      <pre id="error" role="alert" hidden></pre>
+    </section>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

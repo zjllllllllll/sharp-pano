@@ -1,0 +1,1541 @@
+{
+  "format": 2,
+  "date": "2026-09-28",
+  "description": "Current vendored source after checkout-relative path adaptations. Original upstream/source identities are in THIRD_PARTY_NOTICES.md. No weights or installed environment files.",
+  "original_migration_hashes": [
+    {
+      "path": "repair/run_sharp_hard_depth.py",
+      "sha256": "98acc35ed70b4a1d313517d28224d024d83bcaaa32530a38fd3ad80e467cce27"
+    },
+    {
+      "path": "repair/sharp_runtime.py",
+      "sha256": "0e60091fa8984f3be09daaf514dd458babcdc27a6bbf71c4d6fa9eab19bb2101"
+    },
+    {
+      "path": "repair/merge_hard_patch.py",
+      "sha256": "1a134b702ba771c877ef0d8011904d67c43b72c584e953dff7c9a23bef2659d0"
+    },
+    {
+      "path": "repair/gaussian_patch_io.py",
+      "sha256": "4123d5c8ffc04f43e8bc8b67d51ee02c6a247436c195949632136a242b893124"
+    },
+    {
+      "path": "repair/fuse_and_validate_depth.py",
+      "sha256": "33386f54c30a812e79fe5a203f678b575cffb14cac9c466388986bcacc388689"
+    },
+    {
+      "path": "repair/LICENSE",
+      "sha256": "0cd71236aa5cd7440650d2380e1bb88e58b59d1cebbf2076265cf7d0354b2100"
+    },
+    {
+      "path": "providers/studio/__init__.py",
+      "sha256": "f29879c87185a2664a64c343d6fcfab5ee9623cb77f61ddd6c17fc04ed7cc1e8"
+    },
+    {
+      "path": "providers/studio/image_api.py",
+      "sha256": "31fa821f13b72ffd2d3b356680580bd071fe556d5337b12a0599e5d6a41fe4dc"
+    },
+    {
+      "path": "providers/studio/errors.py",
+      "sha256": "573e1a579ecd118e3ca63f54c61d9126bcf4ed5184443f09c65fbeee55cf0f66"
+    }
+  ],
+  "files": [
+    {
+      "path": "providers/LICENSE",
+      "sha256": "6315ba134b90a02b7e978241882d7a113aa698b6ff36f85c0861eecf53c51b51",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "providers/click_gaussian/__init__.py",
+      "sha256": "48b50595019d950ab5be2a529ddb7643f737eec7923a56d0b14454dc1a0035fe",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "providers/click_gaussian/ark_credentials.py",
+      "sha256": "3443819cb79c9025e1889ea7bb7b149a51f1b80c28aea46bf8813ca542263714",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "providers/click_gaussian/image_repair.py",
+      "sha256": "ca717185a5d4108207de558c1f0effcbce58de067954d72b49e5ae125f7d677e",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "providers/studio/__init__.py",
+      "sha256": "a7ab0128edde71b74f84c56591c47dcc7218390086d873a5a72d5a00c03e84db",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "providers/studio/company_image_api.py",
+      "sha256": "16438d971b17683ed3cfd361302478317fd07ebfc5af6b8ac371072a308f2c28",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "providers/studio/errors.py",
+      "sha256": "aae5ddc1cb3e8932334e698cabf211742dfad04fe93f32bebe61b0111ed9877e",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "providers/studio/image_api.py",
+      "sha256": "31fa821f13b72ffd2d3b356680580bd071fe556d5337b12a0599e5d6a41fe4dc",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "providers/studio/oss_input.py",
+      "sha256": "f22eb7be1eb87dcddc200790007b5d2df91489a970e0e4276faac6c66bff33e9",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "providers/studio/tests/test_company_image_api.py",
+      "sha256": "7340587e55adb51679119334f619599f2bdf503b1e13ffc50bce51d7ba2f77f2",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "providers/studio/tests/test_image_api.py",
+      "sha256": "feb2607d1f685bc24a271623bcb656afcdf68dd4481a54c81c9c0a7f0c965025",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "providers/studio/tests/test_oss_input.py",
+      "sha256": "ab77b2784374be63de68a92e7c7a8ed5e7b9fe5ff894e342f732eefa8ef032f7",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "repair/LICENSE",
+      "sha256": "6315ba134b90a02b7e978241882d7a113aa698b6ff36f85c0861eecf53c51b51",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "repair/fuse_and_validate_depth.py",
+      "sha256": "33386f54c30a812e79fe5a203f678b575cffb14cac9c466388986bcacc388689",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "repair/gaussian_patch_io.py",
+      "sha256": "4123d5c8ffc04f43e8bc8b67d51ee02c6a247436c195949632136a242b893124",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "repair/merge_hard_patch.py",
+      "sha256": "a81d22b965ff371bd3fb0d2c18e29469c316687518f63379dafc7c3bb3073c61",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "repair/run_sharp_hard_depth.py",
+      "sha256": "99060dca873d1a1a05870b771cc4acb1433ec61dab521e7369c4342c7d758207",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "repair/sharp_runtime.py",
+      "sha256": "4b685e5654fde0d490462be6f3648e232f5d4ec4c0f90f66da5ac4af282877ad",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/.gitignore",
+      "sha256": "d6d58d1e4320b3d3c098c91199e9e744daf0aa2f0cd9c0f9a3ae38fee20aff77",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/LICENSE",
+      "sha256": "25b126a7df1c30fd01e5890841c9bfb68665e3cc58d30d52c2295d7b8f89df57",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/README.md",
+      "sha256": "fa24f1b101119bed918912440511dd7628fd70a29536aa57fbd5f5968bd57ad9",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/WINDOWS_LOCAL.md",
+      "sha256": "f8ab3f316ac5cb43b36ba41286ff8592ebb6b4f17658e9c6170b959e948301bb",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/baselines/depthmaster.py",
+      "sha256": "e9496e05d60cb62d41ee8c1f75580b212993cce2ac46133ae293d0ad38ccb1be",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/configs/eval/all_benchmarks.json",
+      "sha256": "028d405eddf0e5c65cb7ad4f832d11fc9a73992c1acb260b2f1c64437cfa8b54",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/configs/train/depthmaster_train.json",
+      "sha256": "8739cfd7df2a82b05c2c7b65253e7d5756a57f0b6903400f69f3d78b88a24cee",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/__init__.py",
+      "sha256": "00df1d8313304830bc6c5b51ae914c2b6c62884f210e0482f7a76db8558001ba",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/__init__.py",
+      "sha256": "0d2b87b7e71c7f7279ccc4b4f8b541d26071425284a0ea01a5a435fac4511cfe",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/hub/__init__.py",
+      "sha256": "2932e94a2d67be87b717c49468214c1127be7864aedf37f5891d26be7bc1437f",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/hub/backbones.py",
+      "sha256": "f6de30b19a0ded92124c13ebd41850db44fa5ddb8f7ecfec2fef755299601cb0",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/hub/utils.py",
+      "sha256": "c0533919016531b320bf9aef7cd7001249bc8ef8957cdb29246c15b67d5abdf8",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/layers/__init__.py",
+      "sha256": "5b5f637b2371089e34e0bec9a49518e2250f915aa9e10cae83a32f8e671ad24f",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/layers/attention.py",
+      "sha256": "971fd1498953b626ad67836b069ed3794b1ff46bbc68ea86144b09efff9a1bd8",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/layers/block.py",
+      "sha256": "13a024d6b45dd0c63300f0ef0b5135d8551dc563436c4d70fc4ec7c44980023b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/layers/dino_head.py",
+      "sha256": "9fdb1fa61c0609dc0876f711f9d0d828c33bf9fd972aab3d9c968d44e16b98d1",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/layers/drop_path.py",
+      "sha256": "b9f8236e86054b9d9a71275efcad2a9ecaa1f86b529d4b8d6109ddb5e806f67a",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/layers/layer_scale.py",
+      "sha256": "abb7bbfae152a9de2e6d0961ab5e75c79428e849281bfe50dd07b66b54b485d1",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/layers/mlp.py",
+      "sha256": "255825c73b60a916dd00eb1e38aacbcdbf316e40d6a005efb46e245b7edb43aa",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/layers/patch_embed.py",
+      "sha256": "40da6add3d811198ea3e17cb99cdd4e5cda59e369efbbe3d18d89308618cf142",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/layers/swiglu_ffn.py",
+      "sha256": "4c75f68d902cf497cb51e770ab8720057fa9957dd4c93da83aaf4f8893d14538",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/models/__init__.py",
+      "sha256": "87b360c71997314f41be1c497cc42326fc32617d3a2840f2f19d3795ca8b85ee",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/models/vision_transformer.py",
+      "sha256": "ba8ac2e3f580a46799192342f402ab0435a5939d24899b78a76396de8f23d8b4",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/utils/__init__.py",
+      "sha256": "2932e94a2d67be87b717c49468214c1127be7864aedf37f5891d26be7bc1437f",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/utils/cluster.py",
+      "sha256": "ea195476b1f5316520c07233eb73ff4b0e5fe3f7a2645aacec5b416e7bed157c",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/utils/config.py",
+      "sha256": "588574a78951ccfe7ffaad9ef7cab53d37e837e3ae98cfc1b6a976189073d87c",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/utils/dtype.py",
+      "sha256": "610251537bcf55de8961a17dd625560eae5cfa5082e9382bbd9ded86db92e1c6",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/utils/param_groups.py",
+      "sha256": "ec1daae9eb7c50492091504f97087e3179d46a080d7b7f131967c07cb15cf6d4",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/dinov2/utils/utils.py",
+      "sha256": "10bfc824fdb00cf0c4afc0a875b5763ad4c5f33ec38c2515b12528307b789305",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/__init__.py",
+      "sha256": "4bf57517b8bb3ac91cf880bd26df374c0b472f2ff9e210f76b7c426aa13b40f0",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/heads/__init__.py",
+      "sha256": "82607d975425aac9b1713f249cb7d891f9648e0399208783a9b1d744479c3c6e",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/heads/camera_head.py",
+      "sha256": "edd4c6395d52505c8faedffea45d437185320e4cb50a850685d2b242640be4ce",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/heads/dense_head.py",
+      "sha256": "9918094bcea35403da56527468b103c95d0798b2add5141a36809278a920680d",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/layers/__init__.py",
+      "sha256": "c3956574a766d75183418152b4a7c2baba81c457e279b8506abb030f8e8ba1af",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/layers/attention.py",
+      "sha256": "604344a65cd6e6803f92cf91fb9692fa3be832f23a5916a0996a7df65336a0dc",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/layers/block.py",
+      "sha256": "e136346c8e6d0bcc0bed4b8b2421392696f50b23928a257ac2fc96b4c37ceaeb",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/layers/drop_path.py",
+      "sha256": "caae57753df56f78533e04461b2ef795dcc6b7ca65a6a4cd37b46e4c6b3e0d3d",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/layers/layer_scale.py",
+      "sha256": "81b96171c490346bab55f2b3df9392e93c9cb59b154d20ecb6d0a3967a100850",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/layers/mlp.py",
+      "sha256": "6fe7b8610dcb12d27dbb75aeff55199d5bc208f9eabfa5de9de5329e28ebbf05",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/layers/norm_rope.py",
+      "sha256": "ad881e5a613d965660bc8e20d342fae2a1a473f0f7add689cc8fc86e3f6f5405",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/layers/patch_embed.py",
+      "sha256": "1fbcfe717344b10fbc9d58d17e70f1566651734aa6622bbd5611bf51ac646823",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/layers/rope.py",
+      "sha256": "f4dc1345eb8f18f65229d15cc73c9d92f20f1641108232d224c0fb03b2bc8f4e",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/layers/swiglu_ffn.py",
+      "sha256": "312cba2568457bdf881fc50553b3f71d56668b318ce914a30420a50271ac6169",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/layers/vision_transformer.py",
+      "sha256": "25827db5d5f90323d6fb90668d6edce3262000f93ab851111670cab0bdda5926",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/utils/__init__.py",
+      "sha256": "71df5aa4318a69527ee95c197b5e91c4deb2b3bb996011ea4f3dcd52b4150971",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/utils/camera_utils.py",
+      "sha256": "5e0c800a25ada878af44155d2a7378f97cbe99162461a9844818e263f1df787f",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/utils/grid.py",
+      "sha256": "69a321764cf88ef4cac9b6624eb3debfced2b212834d62ed1ea1b2636f75d4a8",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/utils/priors.py",
+      "sha256": "283977e1b265b793b99eb2c75122e88b5779b21c2b99f56b5246646015ebe5c8",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/utils/rotation.py",
+      "sha256": "cd36b0691a4fe6bfefa9ef4c1e8a75e34e4fb7277e87a3fae3c7936ae64488df",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/visual_transformer.py",
+      "sha256": "a9dfd384f65356dc00a16fe1ba362062d2bf39dd2b1a553375e4ce279529164d",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/mirror_vgt/visual_transformer_lite.py",
+      "sha256": "41cfc7b476e89eca34717654793962a56f408c527e5725ef5cdfc3a5f0f3967a",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/model.py",
+      "sha256": "1b9c70b44d79375a1701cb95a72baeeba874ea2cf8fe956dd229b5a87700397e",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/modules.py",
+      "sha256": "b862f4d0a825828e64972696b9ebb7022562b063348234dedde6f22645f74f29",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/model/utils.py",
+      "sha256": "94bed556e924b3fa416a7e77b3901bb60e119695a61a6e9195afc601bee3e4db",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/scripts/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/scripts/eval_baseline.py",
+      "sha256": "a793ad6d59e912a34bd329d26fe9fd8b0c244146f4318536e600a8696fe3fffa",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/scripts/infer_baseline.py",
+      "sha256": "d294f12edb6f527b50211e609fe6dc6531d7420d20adfd7c92e986a5e25e39e1",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/test/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/test/baseline.py",
+      "sha256": "8f62da7022ab16f3f00556ac38580f085c68477d9200722646c77a78720a0d75",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/test/dataloader.py",
+      "sha256": "52e98a9cb47d24b8e4ddc8ea7f041e68932cf3d6bf7ec701dc47718fb5515971",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/test/metrics.py",
+      "sha256": "d684216b0c699f2882605fa61d91f6e1da830dec7e969f28446e7cd1aca2e8be",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/train/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/train/cubemap_to_equirect.py",
+      "sha256": "4fccde0c91a825d9d00f9655413be9fab15d3370a7de25e09945362b441ec90c",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/train/dataset_readers.py",
+      "sha256": "cb07b8c3e9fe23d7dcbe93a7ab1092c84b058309389182b55d8f89e61bebca27",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/train/e2c_gpu.py",
+      "sha256": "914f8571fe2853fe29ec77adff684b0333d3b12fda18ea5fc8096a7c59bb8804",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/train/losses.py",
+      "sha256": "22602485e360cff7d2f1c5f8132691ef151100eed133da8c112d336bac76b08b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/train/utils.py",
+      "sha256": "97b645e3789cb4739ef87437313405b6b0b2dc04e745ae99f3bc987a3b22e723",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/utils/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/utils/alignment.py",
+      "sha256": "6da3521f44eec9004b04247c067d2749873731a8b9b440dbb24daa5ec4b80da2",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/utils/data_augmentation.py",
+      "sha256": "66c88e71f69064a0291336ad1257342d499ebd0952bf7ee124317b7df6de1da5",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/utils/download.py",
+      "sha256": "929fde9df713247927b93807809ffa9b5a49572d6bd5bd1ae57235d2c8f4fc91",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/utils/geometry_numpy.py",
+      "sha256": "2a4854b76a5f044e0c85eef1c7c2367d5ef14291f059cedfa2994ee4ce2467be",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/utils/geometry_torch.py",
+      "sha256": "6d620a619dfe0e33ae177b701520b2e030b9fcbbc2468b43252d33bd538bd137",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/utils/io.py",
+      "sha256": "36dcbc1fc933dcd19d2c97d3a7a3d556ce3f3a191055bb4cc6f93168c4ef32ba",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/utils/panorama.py",
+      "sha256": "861e747f6fa5d9c855cd4e9d7964165a6d3e3e73f81ad78d6dfe98f6b6d70d8d",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/utils/tools.py",
+      "sha256": "ee4893ddbc49da5b24ab43277e9693e86a842dace69452803bab85b531121f60",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/utils/vis.py",
+      "sha256": "3d7e98b310b3a07558b301abc5605d9380f73bf96727714343decbbaa15c2985",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/utils/webfile.py",
+      "sha256": "3ffcd69e343b9c867cf52c80ec1923f76478a6e8bda712cc677bfefb077b0777",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/depthmaster/utils/webzipfile.py",
+      "sha256": "5e68057dad8f05ecbd08883f2b960211512c28bdb0243d32700ec5102b735668",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/.nojekyll",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/README.md",
+      "sha256": "8461f5a05463f6f53d26d9ad6b00f4f081d74bd9b8731e350150fe306790c6bf",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/index.html",
+      "sha256": "a5d7566a6e17016ee9539c59a2f33b09fb91ae759d7831366383473ab51b2161",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/css/bulma-carousel.min.css",
+      "sha256": "8c17d3f26d436a2d27fe197509db3dc1075064314056f89fcb85e123b6f791c3",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/css/bulma-slider.min.css",
+      "sha256": "83a8c08f31f6386a7f47ac390247f419354e9f5577fd2113231e939583659314",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/css/bulma.min.css",
+      "sha256": "58b28659220961ead137cb5b346b5759562750ce703094d70fc786e0db467033",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/css/fontawesome.all.min.css",
+      "sha256": "af1e6edc875a382b338bb25bd7c5c3f474a7f1b36212002a5896dd06f2186325",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/css/index.css",
+      "sha256": "91e67d25f328bae07e8019b395516d1c6fc77cfaef274789faf3cbf2f6561ba6",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/css/sans.css",
+      "sha256": "a0580ab4a81e1fa8e4c993f9e3f401c11b1cf8b69bcd3f4241edbf8d1d185a86",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/css/selection-panel.css",
+      "sha256": "e6747511b75d29142c2641684b2babe46c154178ebb4b2b2fca8973ebb5ffb38",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/css/theme.css",
+      "sha256": "7e9755a7c080474c810625a941ba3afd42cf23b4625824ac9878cd7a67080048",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/demo_examples.json",
+      "sha256": "c31054b7668a4a88032707fc5c8e149b99a26952ab9329ef49f9c7a2257a1ea4",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/demo_examples_pano.json",
+      "sha256": "9b9e6ecf5c08d87d3b0fd27ac2834709fb35cfbf1cc02950f419cb046cf6275e",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/images/framework.png",
+      "sha256": "a1286cec7eb35c1d860537d78c6b08e9c2b25cb1e833bad1f26487f8507be0bb",
+      "hash_mode": "bytes"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/images/loading.gif",
+      "sha256": "109a419cc23b40c542b12da6c46580f885fcc211d9f71e0e13dc7ba698de576d",
+      "hash_mode": "bytes"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/images/overview.png",
+      "sha256": "ac323906cca8bdb57ae14a387766ab122e7c3c2d2b7b78e657ca3ce8cc986596",
+      "hash_mode": "bytes"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/images/pipeline.png",
+      "sha256": "3ffd1346a39bd38d22557014f846aba9facb682f9323ba1b71b6b14851c4913a",
+      "hash_mode": "bytes"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/images/polyu-logo.png",
+      "sha256": "2859ea619487fff85b45711eafbe1e5fe4738ee4fc773457f7d8bc073b752a03",
+      "hash_mode": "bytes"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/images/vclab-logo.jpg",
+      "sha256": "4dc34f0b525941dff5ed953e89fb0a6bac109fae11d397c84b43a02ff03ec4d2",
+      "hash_mode": "bytes"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/js/bulma-carousel.min.js",
+      "sha256": "55250ce0175b9c9f4a1bd8e8de57a668b1d428d0b4a840719cc2c48132d614ad",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/js/bulma-slider.min.js",
+      "sha256": "e520e9ef6e3223ecfbb50b4649d238af5a85af9161800ad1d003dac80d748f24",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/js/config.js",
+      "sha256": "fe526283d25d7bf3924aafa7e26134498a36be9b20d11cdf993afadb4678a805",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/js/demo_comparison.js",
+      "sha256": "52e9617260838fd6c0316968591b26b1667b8926856e01627681033b5439a84a",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/js/fontawesome.all.min.js",
+      "sha256": "20a3ef6979bbe5e4de1afaecc703e1d34cbc5e3ceab36d378539506327692d72",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/js/index.js",
+      "sha256": "16490cdbb8a18d6874015ce4f1b7dcfd3e674f5f4fb23f8cb695a25f0ccd34d7",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/js/jquery.min.js",
+      "sha256": "6150a35c0f486c46cadf0e230e2aa159c7c23ecfbb5611b64ee3f25fcbff341f",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/js/nav.js",
+      "sha256": "f820ad374d905914b4104226118b5c80ba6555084d3a108dfabcd3f205b49ac7",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/js/pano_comparison.js",
+      "sha256": "f5e88bb8efb4199e86812bd546a9bbcb6281474de917eeaae4907ff5ab327384",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/js/perspective_gallery.js",
+      "sha256": "26d11a5639e843fed08acf85c1fc8fa4dbf9842a59ba6aaae3f9282a5ba483a3",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/js/selection-panel.js",
+      "sha256": "8c64c17504379348bcf7d8eca033c4572ee083d5be135ed5f5665e65039d6dde",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/pano_gallery.json",
+      "sha256": "309707de74cd971af8f35d11f861f245073bdd6d6a5408cf6256372358c6ac6a",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/pano_indoor.json",
+      "sha256": "aed7d0cf1b4600d91c690379098a03f89ef6848930c32144303423d98f5e0a9b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/pano_outdoor.json",
+      "sha256": "c156c220ae5d06b1782b52e7ed779efaf7cdc0ccea4500595c5609dd75a47dc2",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/perspective_comparison.json",
+      "sha256": "0242a50a9125642d645a8e30637a0b36489949842fd6423e0d6541edb4d9ac79",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/docs/static/perspective_gallery.json",
+      "sha256": "b91e17d307ebcbfae40792c5999f6053ceed756e7179735ce1904ef8fd6fdcd8",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/download_checkpoint.py",
+      "sha256": "c87968b9252333ed15e77016315fef03e9f79790ec850fc9dd5c536cbc81ae2e",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama.sh",
+      "sha256": "346ea6d4bca2282391bfe3e409d967cef2e53499210ef31ad825eb8d359a67c9",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/configs/eval_panorama.json",
+      "sha256": "9ed75b5e72a9414ae9a9a83a80ff84ab08ffdb2c3e0f732379adef272ad76320",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval.py",
+      "sha256": "4091731c5e9014634ea4d88a78e149d52ddc7eb1a6c41476f19d9954af838840",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/datasets/__init__.py",
+      "sha256": "73b87a6e868e8087d578d81d9708e10d1b71ef3a98ec4bef8b26accc7d0c310e",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/datasets/base_depth_dataset.py",
+      "sha256": "2fef273fa38e5f0a74da10ca5606ae0bbeaee1b143bfdfed449d354c3602daa7",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/datasets/matterport3d_dataset.py",
+      "sha256": "6db1352293afa66ef8f3b6ca79e4166e46643c21982ca1d5b5c2a573888a756f",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/datasets/panosuncg_dataset.py",
+      "sha256": "f8bcce981c8644df54d35dc88198f28d9eeb92b865223a811cc36e91b3aa1e62",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/datasets/splits/2d3ds.txt",
+      "sha256": "d418475e10b54b7d2ed94ebb35ed0657883f61b7ba90775453a1b8b9c6d4d437",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/datasets/splits/matterport3d.txt",
+      "sha256": "dd8fcd95a86c5a5cccd7070466b5df1ad166c11b18e406a1f3c641fa4b94c66e",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/datasets/splits/panosuncg.txt",
+      "sha256": "f7ac96361b88315293801b98aec2373f4f57845f5531e43a0fc7602592a71d7a",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/datasets/stanford2d3ds_dataset.py",
+      "sha256": "192ae94f0262694cd27da3cc22e236038425118d34539ceafd82e02119122d16",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/utils/__init__.py",
+      "sha256": "0bd886102e4d69197a24ecd55186be8c8bf5506168109df5b3fb143d4aab6e15",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/utils/alignment.py",
+      "sha256": "ef9eef7cf9bfc289cc138641cf11375848081f4c1b3021872e4ec7c91ea73477",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/utils/infer.py",
+      "sha256": "186b35eab98ce8db8558b81fa2c4989f81f31f66613c1228c27df67d0be79cb7",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/utils/io.py",
+      "sha256": "8c82122b2a5507951c45ed71e9d11d0f70a9d07abfd37d9f401e8a7d24019671",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_panorama/eval/utils/metric.py",
+      "sha256": "3d3cac5ccf284a914aad72b24abed060e6e7863d45de4258d09a0f66101e9403",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/eval_perspective.sh",
+      "sha256": "2a5e385f4f42f72a5e8b8c21703e68a3405d823109a2ce9dd51bdcd509d7840b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/export_relative_depth.py",
+      "sha256": "6d3cc93e3677ccd32e77e8d7f05f6f22849928680374729c6d0bdf92f0c75c69",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/infer_panoramas.py",
+      "sha256": "888e639b8f181efe91ed494b451459f0547df4cd92cd07f5d26f75b47fba00cd",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/requirements.txt",
+      "sha256": "148b80df9ca8bd79bb53e525bcc81f2c2f9f3ddd063669c6801dc8d6c5e1f266",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/test_infer_panoramas.py",
+      "sha256": "a92c3a1caf742c771fc6f67d1e3ae71b99d99ebefcf34c9cca5354485bb75ef8",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/test_relative_depth.py",
+      "sha256": "fe9e8550988a4bfcc6de0f18c5bfcb79e8dcaef4ab554ffdcdd601e470da12f5",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/.gitattributes",
+      "sha256": "1a1dbe176bc233b499d35a57db7513f2941c99ab9759f177830c9149be99005b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/.gitignore",
+      "sha256": "6627a3ec10d6243f6b689e4afab2d119f8e868d77ac0d59c52f51703df22321f",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/LICENSE",
+      "sha256": "197b6e9eeec3ebf5ff80edc89c0eecc9f33fff0b9074500c042ce67ff6665d3d",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/README.md",
+      "sha256": "7f3160e4b087ac74bb9428b72d1577fdbc484c82f2a27d644e3a9c137a00d21f",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/doc/teaser.jpg",
+      "sha256": "2e5927fb017953e31403618dc8613c0996e0789c7947342b3f42adbf91dcd0b3",
+      "hash_mode": "bytes"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/gen_doc.py",
+      "sha256": "818d707d290d6b322829477e8984d61ed28863458766374755b47d6a3da1c441",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/gen_interface.py",
+      "sha256": "3e7233a78c53ba01a980a2f008e609da0bb8733a24795a76f2b5949478057517",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/pyproject.toml",
+      "sha256": "ef177b54dca47833673dbb830cc2a4ea1f616c74b362ff87ecf4a9267fb0c7a7",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/__init__.py",
+      "sha256": "f7a74064dbe92cacf71bc7acba8fd8c5af7e8a32351cd8845f7787e5111351f6",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/helpers.py",
+      "sha256": "bd842101a945762e77803901cd30e3970ddb424956209bb42466e6791a6d9da2",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/interface/__init__.py",
+      "sha256": "970b964213749646be21400a77f0862f11f6c8ae7871957cd497850dc43c289c",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/interface/__init__.pyi",
+      "sha256": "fadaf6b4d8b2cdb26486e70f408cc979bf142bd3900d460732cb3d779f486572",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/__init__.py",
+      "sha256": "d2088d447e73e76f4a76f4ada7dacfd6e56a11b327072694c41577482b7f144b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/_io.__all__.py",
+      "sha256": "5c2f88f6c39588bc4872713f961e436166265314a19b3484e1c4d6a30ba8baf4",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/_maps.__all__.py",
+      "sha256": "d00b8772d8071bc75a24204eb1a59e3048cf8fa96edf28c8a3eadddd199e8cf1",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/_mesh.__all__.py",
+      "sha256": "e80a2524bfe8630403627714be46f307b178b320374e60fa17594fd0002670ab",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/_rasterization.__all__.py",
+      "sha256": "44aa9683437a28841e62ebdc49390a83d840f00618ac1c14e1d473579b7714c7",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/_transforms.__all__.py",
+      "sha256": "321f8394685d0a64524c7445fa6c05d066b716949f5943efa4781c840dbb9446",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/_utils.__all__.py",
+      "sha256": "8735d27c68a89c2d45719ce081d10efcac8d35696b3158cb4c63c171a54913f8",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/helpers.py",
+      "sha256": "c6a2af30b3d0bf0361f17aa26ef4162803ebf708e05e9399bf62f6ac483a47d6",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/io/__init__.py",
+      "sha256": "ff8b36529a53bea2e7daf58afff1887b8e55d67fd4e22e22d7db276ea4db3652",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/io/_colmap.__all__.py",
+      "sha256": "e7bade0d96d14ea957d04b3671d02f0d29a60b1c30a76d543458d1eb1cd064d3",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/io/_obj.__all__.py",
+      "sha256": "0049c9ef8a39c676cad1dc706e3cda13bbd8dda5206c62cdb1c7680468ced7cf",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/io/colmap.py",
+      "sha256": "9ada83ae20f4ca06290ee529b17d770229df286ac5a4ca8ff0f579c0b08cbfb3",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/io/obj.py",
+      "sha256": "6f5a2e2c65526cbe1b76e34eec5c0387471f33ce77c92eb3326bc96a4f89003d",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/maps.py",
+      "sha256": "06489ac97c737b6fb25308ca0f078f80a0eba1f3b1bc507c15ea9bef18d6d212",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/mesh.py",
+      "sha256": "a397524b438309ea5b0692e987268d81fb8cc29ae7ff36a3bf7029ffc05a3506",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/rasterization.py",
+      "sha256": "f56a01bd56759210cfc61443002a72b69f7206b5eec2e2380db4e11394a110e4",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/spline.py",
+      "sha256": "910d1197736abc8041050bd4f6bccd945e907f223a57dbd7bb0eed6adf6a9410",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/transforms.py",
+      "sha256": "bcf78e1b64854a9d6fe006e76014eded016e4160e50926d8b03f8dbabbd1d042",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/numpy/utils.py",
+      "sha256": "795b1bd0cf2af5a27d10a37ddafff52aeb904f65f4b254fb969d24a8d2735549",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/torch/__init__.py",
+      "sha256": "749890355cc46ee925c194ae336c1d8083f6278f8668d366ba14abc77718e0d4",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/torch/_maps.__all__.py",
+      "sha256": "101d5a4975b0e0117b37a4fb1f6513ac9b2895aa77614f23f7fd63d8626dd141",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/torch/_mesh.__all__.py",
+      "sha256": "1142125eb587c2b05169fa7734d8ac7c2bf2fd33fde2f7250f4acd3d46c4f8ab",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/torch/_rasterization.__all__.py",
+      "sha256": "34807455d575399c12a0c7bca68a8968d01571ae86ff487c2f4e04cad70e96a3",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/torch/_transforms.__all__.py",
+      "sha256": "a090789144ab6c37b0adc731beadf766e91e572b41ca3aa6a453d1f0b6cbdecd",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/torch/_utils.__all__.py",
+      "sha256": "2607cf35b40c342946d19644619896f4ba4ebb4697758ac352788d5e06511b17",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/torch/helpers.py",
+      "sha256": "d5a34ced1e5b4841f15ec956a4044ab82076bb75a7b9998ecdc812eb8252d80b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/torch/maps.py",
+      "sha256": "f83dbc61d15c50fbae8bba06dbd882578566581d397daf4aa65fd79b08cd40c7",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/torch/mesh.py",
+      "sha256": "a3c3e0d738fec58bdc21a2eea147ad4d1a79fd7c01907334aa5fc0cae45b1ed8",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/torch/rasterization.py",
+      "sha256": "938ae9023d4d4c00572386f9ce9e4448b8ab4a46fcda6cbebe7f3a82f2213fb7",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/torch/transforms.py",
+      "sha256": "5bf220669fddf087ddc1fd591765c1039e20df57144cf05b8ad75126d6afedd9",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/third_party/utils3d/utils3d/torch/utils.py",
+      "sha256": "414059eec3a446ae25433ec1fea8d58d5b49a79ecfa4bc4fd317c98a4002f9a3",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/train.sh",
+      "sha256": "124dcc133e283beb9dd69f4de9095cb3d8794a46cad5c72d5d537b4325ca9382",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/training/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/training/configs/paths/default.yaml",
+      "sha256": "d397afd3a9a7cd8dc2a0bd035add9071cc31513cfc5e92ada30648e8f2d3fe41",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/training/configs/train.yaml",
+      "sha256": "2bea4b66ab351e0d44cd1e710cfe475c12ffffd750b3014a81e21de8df20161f",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/training/configs/train/depthmaster.yaml",
+      "sha256": "a2847891ddbd67ad51667ba570cf88c99debec61af2166fdb670d900e8d1027c",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/training/configs/wrapper/depthmaster.yaml",
+      "sha256": "6d6ea25f155bba9afd9543737b2e3ffed72bbf0897573abdd7d1906936d90c58",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/training/launch.py",
+      "sha256": "6efa4b20470bfb0d23730b01d29695625cf9c9aa84ec198330d7a7e16ee05bda",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/training/utils/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/training/utils/callbacks.py",
+      "sha256": "9a483ff166d1690c7f6841905633f1c4da92598e4b775d00f6153f39e5e9bd25",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/training/utils/logger.py",
+      "sha256": "b67a33c38f94f484a453cc877c8e674854a3f896609df3b48cbcb366e7f686db",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/training/wrapper.py",
+      "sha256": "bdd63bce0bd5d0f435c4ace27d809dcd541425a2f30c4858941e3c619cfe54cd",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/DepthMaster/verify_results.py",
+      "sha256": "7db2fc4adbd184806877c12268d0729aff120f1523d179a69698aeb76361f46f",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/LEGAL.md",
+      "sha256": "adba50d9794b9ef3f7ec8cbc680f7f1fa3fbf9df0ac8d1f9b9ccab6d941bc11b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/LICENSE",
+      "sha256": "56ae0eb5ff848e312f8ecc450c806f710821db153b0e8db18a0d69d5a6f60f8b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/README.md",
+      "sha256": "f060db60f006fdb08c8805b99a36ee6b03f71238ac04c345ceda114993f09e46",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/__init__.py",
+      "sha256": "20466a32b5c18e07a2afc9c1793ca48123039ee7e1a46de37461fb153a8d3193",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/__init__.py",
+      "sha256": "0d2b87b7e71c7f7279ccc4b4f8b541d26071425284a0ea01a5a435fac4511cfe",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/hub/__init__.py",
+      "sha256": "2932e94a2d67be87b717c49468214c1127be7864aedf37f5891d26be7bc1437f",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/hub/backbones.py",
+      "sha256": "74b7f24365cfd454326c91f438c77a4d7f0c3fb2a424eb6a5d48d53573bbf54d",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/hub/utils.py",
+      "sha256": "c0533919016531b320bf9aef7cd7001249bc8ef8957cdb29246c15b67d5abdf8",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/layers/__init__.py",
+      "sha256": "29d808e091d40cfdb4d5a4355c3c0fc325353686e6b0b0b3f6a24676ca4afd78",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/layers/attention.py",
+      "sha256": "cc3f20ec18a07061297bcbeacc842aec43534f8eb5fd62516273c2c3385a6b79",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/layers/block.py",
+      "sha256": "341f236380c0738a541d7db7d9cef396f4c62a3260642a7eb7ddc2b31683ba28",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/layers/dino_head.py",
+      "sha256": "9fdb1fa61c0609dc0876f711f9d0d828c33bf9fd972aab3d9c968d44e16b98d1",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/layers/drop_path.py",
+      "sha256": "b9f8236e86054b9d9a71275efcad2a9ecaa1f86b529d4b8d6109ddb5e806f67a",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/layers/layer_scale.py",
+      "sha256": "abb7bbfae152a9de2e6d0961ab5e75c79428e849281bfe50dd07b66b54b485d1",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/layers/mlp.py",
+      "sha256": "255825c73b60a916dd00eb1e38aacbcdbf316e40d6a005efb46e245b7edb43aa",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/layers/patch_embed.py",
+      "sha256": "40da6add3d811198ea3e17cb99cdd4e5cda59e369efbbe3d18d89308618cf142",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/layers/patch_embed_mlp.py",
+      "sha256": "0c18967ba6195c7864c5a963b3c128f125daea7198a0a9e0fc2528eb3246f221",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/layers/swiglu_ffn.py",
+      "sha256": "4c75f68d902cf497cb51e770ab8720057fa9957dd4c93da83aaf4f8893d14538",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/models/__init__.py",
+      "sha256": "ed3430c69b7845b741ac3badc189e901a52a7d45a97d6aaa441b79be29734f8a",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/models/mask_utils.py",
+      "sha256": "f7a7db258f0a29cae1077056c95010b14004952ba455ba7915c0f2bbbffe75f3",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/models/vision_transformer.py",
+      "sha256": "c9119c936197b7c6699000164d7a1fd82237deb17af60cdfc2faa569311cc4f7",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/utils/__init__.py",
+      "sha256": "2932e94a2d67be87b717c49468214c1127be7864aedf37f5891d26be7bc1437f",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/utils/cluster.py",
+      "sha256": "ea195476b1f5316520c07233eb73ff4b0e5fe3f7a2645aacec5b416e7bed157c",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/utils/config.py",
+      "sha256": "588574a78951ccfe7ffaad9ef7cab53d37e837e3ae98cfc1b6a976189073d87c",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/utils/dtype.py",
+      "sha256": "610251537bcf55de8961a17dd625560eae5cfa5082e9382bbd9ded86db92e1c6",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/utils/param_groups.py",
+      "sha256": "ec1daae9eb7c50492091504f97087e3179d46a080d7b7f131967c07cb15cf6d4",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/dinov2_rgbd/utils/utils.py",
+      "sha256": "10bfc824fdb00cf0c4afc0a875b5763ad4c5f33ec38c2515b12528307b789305",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/modules_decoder.py",
+      "sha256": "e809c6f5abb57061b58e43e50a04e20ac2179503abed02cafda3f82dfac7387e",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/modules_rgbd_encoder.py",
+      "sha256": "72f06b74ba10c39ae20b01154c8b0b108a17e47e0bb978563c80fc51fe5c46cd",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/utils.py",
+      "sha256": "a7108de9525839a7277c6ce0db6d8108156739cb02571ad6a87eb822814204e6",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/model/v2.py",
+      "sha256": "239360a3245285b1d7bdd966aec795c810e0c2747c009d0d30eb0327b12a5875",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/utils/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/utils/geo.py",
+      "sha256": "b235df79d279a8ba0c1d62004df0a8af9a0c2a0faa4ebb52a0e7140f0541c8eb",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/utils/io.py",
+      "sha256": "b6907a108db83f8e40862c96ad089bc4d05dd88a630430b5c0f8c67ef5e1d20c",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/utils/tools.py",
+      "sha256": "ee4893ddbc49da5b24ab43277e9693e86a842dace69452803bab85b531121f60",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/mdm/utils/vis.py",
+      "sha256": "564fbb5898b6981c70fb3ce845b4ad1a1594360bd10787773ed194efa497c88a",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/pyproject.toml",
+      "sha256": "ead97cc2acc436b7f8dc538c634a1937a85ea89fb2202fa9c1ec8a812a807bfa",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/lingbot-depth/requirements.txt",
+      "sha256": "08e5c1253755a68475afc63e692510c1bbbcbaaa5d758eef1584bc40a455ccb4",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/ACKNOWLEDGEMENTS",
+      "sha256": "d24fb67f264da8786036c17ea48a702493e7dec4daf6abe53cb179b4c465546e",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/LICENSE",
+      "sha256": "cf9fd1ebe78d3effd9f782d053ffbed7f69b033e5260e706c0f216e0bd4675fa",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/LICENSE_MODEL",
+      "sha256": "e177a921ef25a523c429c6916e819c769bb4942619aadd16afe0108105a2baaf",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/README.md",
+      "sha256": "988c298e23e8ea133bf01bd2f3ef0418c0961d1b94020304e96c247f82b17cbb",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/pyproject.toml",
+      "sha256": "fb7e062c1246de76aa01fd5ddbb7e23b1489049747022fc9940564046fe88f88",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/requirements.in",
+      "sha256": "0cac0e472eba3359aa79e9674ff11a5fd0484b9c465fc1cb774c30938edcc5d7",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/requirements.txt",
+      "sha256": "242563109d7a1b421970b42d962365f184f6913cfb31ea9d0732d59fe58fbff8",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/__init__.py",
+      "sha256": "74a548abd45967a89c6c6218c47208a9fd731156fced08e21c1a2ac6be2eb6a2",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/cli/__init__.py",
+      "sha256": "3b18356dcb30598c92c7c61c24c8f2e3bd311ffecf92cb79ae2b171202c84779",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/cli/predict.py",
+      "sha256": "f7bb5b932a026540e46bda711aba60aa276fd059c971b21bf5973444e7b6198c",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/cli/render.py",
+      "sha256": "7d51b234d3070e95a05f72fb99d9aa475630e2c258c0bdab3b601d421784d2ce",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/__init__.py",
+      "sha256": "7b66dd200eb37f8ede67812be6508993f4d7457b1bd3d057c533345580469f3a",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/alignment.py",
+      "sha256": "e5ddc5fe158467fb460fd92c8e776ded244a271772b28fb6ee542a22fa979ad3",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/blocks.py",
+      "sha256": "ec9a1d90bed813920c09dc55c40e1cad586ec7928fee679d673985c2aff559cc",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/composer.py",
+      "sha256": "649515a45d2e4eaad1f6d528c34365d856eb896096461b78c91380dcd991002b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/decoders/__init__.py",
+      "sha256": "4a6c42d338a407a0aab170843a3feb5d74a6eb9ad1d54baace5558beb65f1f7c",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/decoders/base_decoder.py",
+      "sha256": "80b5190ee73db47396026c7e8fab2272dae0bae30c8e77b96fc95a84e7c04c74",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/decoders/monodepth_decoder.py",
+      "sha256": "a627792f4e1a8451c911efc0ef731fac391f56732e3a99ef67cd10242f923cf0",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/decoders/multires_conv_decoder.py",
+      "sha256": "cd53feeb3bb70229ca3f014e829b3946b0641f1d7a464d177a9a2377eaa38e09",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/decoders/unet_decoder.py",
+      "sha256": "e7990045866a1de521e6894d0e8f2afee30a81d66929f60b89f62db13126da12",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/encoders/__init__.py",
+      "sha256": "e2abb1e31a35f41fae626585d9e291846bc00a41e88393e4197be733c8f82751",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/encoders/base_encoder.py",
+      "sha256": "ea8385db8ffbff854693be20f866a324578f839c7914f8f8a1807a66ceefe32d",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/encoders/monodepth_encoder.py",
+      "sha256": "b875dbd31740bd0954313f259d524ee4e047f07e94d97356bbb93c36378466d2",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/encoders/spn_encoder.py",
+      "sha256": "7e2bc041ca9aee1653ad036bad5e3f813e63f3725349fe2e269395908d907bdf",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/encoders/unet_encoder.py",
+      "sha256": "57857c3ff4efae41d686aadb9cdba249a70baed94f6f69d24c51936cd165d51d",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/encoders/vit_encoder.py",
+      "sha256": "98760c661f84672e582935c0f9ee157db05459ccd3d3db880286c7e8665e640a",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/gaussian_decoder.py",
+      "sha256": "b31402b5b77745db522b5a56a0a399072088b1e35f212ea9257aa38f2ca1c6f5",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/heads.py",
+      "sha256": "30976ee79866bb9f029bea0eb4698cc37f73ffa5f0c68b15763c78f5dee5ac2d",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/initializer.py",
+      "sha256": "6f6f8ba3516cf1749c57e5751e5a02262c64ce8aba5d526f32937312a3f309f5",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/monodepth.py",
+      "sha256": "6ee1b6ec5eb72c71f2d2526ec00c611b1ba96f02f639c066818469a4db8bd69b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/normalizers.py",
+      "sha256": "2925184ffd56304e30dad389aa0a4b456cfe4560d2ddb9e73604db6e29ddb9dc",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/params.py",
+      "sha256": "7cebca98bf1fe4359691cb416b0fdc765902184d0a05064f9b9f1fdb36e9e97c",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/predictor.py",
+      "sha256": "e22c69610f74fb536d3bd4e1225f14d013da8988b3d6e5e419fb57e162130a20",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/presets/__init__.py",
+      "sha256": "0c1c89f3e41c22d9dac162843d750c903201dd4448aa67ccc1f3bcf666e0746b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/presets/monodepth.py",
+      "sha256": "48d922f7c3d2f187d8d5a5a7a0fe4c530f7a5648606497896f678b5e3093620f",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/models/presets/vit.py",
+      "sha256": "36c30feb99a5b5a52ff35b61a4a2023d618311b771f55341c8c90a498dbc42ca",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/utils/__init__.py",
+      "sha256": "ffbebad026d43614433257a3116db907d380e1913598eda8a5d7f67a218dc31c",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/utils/camera.py",
+      "sha256": "6a101b3a2320d90a82b508ab7ef8e160ce03aba6ef0949636fc1315bef27d95b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/utils/color_space.py",
+      "sha256": "13068b828c241f15fc19974675e5b21f850049743def977b118e01fc4e94e371",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/utils/gaussians.py",
+      "sha256": "6019135f98f131e06626c7100f0c0e8d33d5982fb6050ea1d0ba83f9504a35c3",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/utils/gsplat.py",
+      "sha256": "0e0edf8d6f95a21e12d3e2953f1d401983e73b36bbd21669ff7466172232a268",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/utils/io.py",
+      "sha256": "e2ac4d60d511ea8510c5559743fa06b8331d3cea140bf9ae1db1f86006fd3232",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/utils/linalg.py",
+      "sha256": "ee95254ad3003b2cced8807748c29e5e5e437bb4b6c095903c34a2da160d5c9a",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/utils/logging.py",
+      "sha256": "cc7af3bdfafaaf1b41dfc5125b43ea720b8566bfdf8fd6663d27cb2525ab31e0",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/utils/math.py",
+      "sha256": "39b4d2b98a93ad264a22b884fa9c7fdeffcbdd9ac55cc4f1dc00b5d45011c1c0",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/utils/module_surgery.py",
+      "sha256": "dfec8fa2e9aa38218fc96ada280f19bf3f92851fa4214984a61d88c5d365e11b",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/utils/robust.py",
+      "sha256": "0ad7086a880b88408177577b542265136468bb4d0cbe1c17679fcac19e5ea2da",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/utils/training.py",
+      "sha256": "25c527f9bde7d76a81d8c28babf2cf2e00e7b669c807fd8c4bdc4e753f6504b7",
+      "hash_mode": "utf8-lf"
+    },
+    {
+      "path": "third_party/ml-sharp/src/sharp/utils/vis.py",
+      "sha256": "390ecf76f0a8ea52f18935c57d4b1542480561faf553c6ba8c13fa6620dcfdfd",
+      "hash_mode": "utf8-lf"
+    }
+  ],
+  "hash_note": "Text snapshots use UTF-8 with LF-normalized line endings so Git autocrlf does not change verification; binary files use raw bytes."
+}

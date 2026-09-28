@@ -1,0 +1,3 @@
+# Install into this experiment's .render-deps with --no-deps.
+# Existing DepthMaster NumPy/SciPy/Pillow are reused without changing that env.
+embreex==4.4.0

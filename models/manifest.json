@@ -1,0 +1,23 @@
+[
+  {
+    "name": "DepthMaster",
+    "file": "depthmaster.pt",
+    "url": "https://huggingface.co/VCLab-PolyU/DepthMaster/resolve/add341b64ae9f90372b6483b334ac496a18fe081/depthmaster.pt",
+    "bytes": 1541004203,
+    "sha256": "e61e617acdd0b40bd2c217def5d60b0bd05352e6ae61d940a49c2374c6c75982"
+  },
+  {
+    "name": "SHARP",
+    "file": "sharp_2572gikvuh.pt",
+    "url": "https://ml-site.cdn-apple.com/models/sharp/sharp_2572gikvuh.pt",
+    "bytes": 2809738232,
+    "sha256": "94211a75198c47f61fca7d739ba08a215418d8d398d48fddf023baccc24f073d"
+  },
+  {
+    "name": "LingBot-Depth v0.5",
+    "file": "lingbot-depth.pt",
+    "url": "https://huggingface.co/robbyant/lingbot-depth-pretrain-vitl-14-v0.5/resolve/79204ed6b837f4fdd192cf563e59481fecfa0295/model.pt",
+    "bytes": 1284837952,
+    "sha256": "b60cf27ddbd0e51e9b59b03475c0d39d02d2e48ecf8dbb5866f04d46802b3c23"
+  }
+]

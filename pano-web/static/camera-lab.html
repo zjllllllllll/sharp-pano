@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>相机采样实验 · SHARP</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/camera-lab.css">
+  <script type="importmap">{"imports":{"three":"/vendor/three/build/three.module.js"}}</script>
+</head>
+<body>
+  <header><a class="brand" href="http://127.0.0.1:8766/" target="_blank" rel="noopener"><span>S</span> SHARP</a><strong>相机采样实验</strong><a class="back" href="http://127.0.0.1:8766/" target="_blank" rel="noopener">打开原五步链路 ↗</a></header>
+  <main>
+    <aside>
+      <p class="eyebrow">CAMERA LAB / 独立实验</p><h1>从轮廓到新视角</h1>
+      <p id="lab-rules" class="muted">正在读取采样规则…</p>
+      <label for="lab-scene">测试全景图</label><select id="lab-scene" disabled><option>加载测试集…</option></select>
+      <div class="camera-nav" role="group" aria-label="测试全景图切换"><button id="lab-scene-prev" aria-label="上一张测试全景图" disabled>← 上一个</button><button id="lab-scene-next" aria-label="下一张测试全景图" disabled>下一个 →</button></div>
+      <label for="lab-camera">采样相机编号</label><select id="lab-camera" disabled><option>先选择全景图</option></select>
+      <div class="camera-nav"><button id="lab-prev" disabled>← 上一个</button><button id="lab-next" disabled>下一个 →</button></div>
+      <div id="lab-camera-info" class="info" role="status">正在载入实验结果…</div>
+      <h2>相机点位</h2><div id="lab-camera-list" class="camera-list" aria-label="相机点位列表"></div>
+      <div class="note">独立采样实验，不改动原五步链路。使用原始 RGB-D 未知空间 Mask，尚未 AI 修补。排除点不进入候选列表和导出；点击叉号仍可检查历史预览。Mask 与连通筛选不等于房间内外分类或家具碰撞认证。</div>
+      <p id="lab-progress" class="muted" role="status"></p><button id="lab-refresh">刷新实验状态</button>
+    </aside>
+    <section class="content">
+      <div class="section-head"><div><p class="eyebrow">01 / TOP VIEW</p><h2 id="lab-title">俯视轮廓与采样点</h2></div><a id="lab-map-download" class="button" hidden target="_blank" rel="noopener">打开原图 ↗</a></div>
+      <div class="tabs" role="group" aria-label="俯视结果切换"><button data-map="camera_map" aria-pressed="true">编号相机图</button><button data-map="overlay" aria-pressed="false">轮廓叠加</button><button data-map="bev" aria-pressed="false">俯视点云</button><button data-map="overview" aria-pressed="false">全流程对照</button><button data-map="evidence" aria-pressed="false">几何支撑</button><button data-map="full_bev" aria-pressed="false">完整投影范围</button></div>
+      <div id="lab-sampling-info" class="sampling-info" role="status"></div>
+      <p id="lab-sampling-error" class="error" role="alert" hidden></p>
+      <div id="lab-filter" class="filter-panel">
+        <strong>固定筛选：Mask ≤15% → 与 C000 同一四邻接连通分量</strong>
+        <div class="filter-line"><span id="lab-filter-summary" role="status"></span><button id="lab-export-cameras">导出保留相机 JSON</button></div>
+        <p class="muted">绿点＝最终候选 · 红叉＝Mask 超过 15% · 橙叉＝与原点不连通 · 蓝点＝原相机 C000 · 灰点＝待渲染。连通仅允许前后左右相邻 0.5 m 格点，不允许对角连接或跨过被排除点。等于 15% 保留；原点作为参考豁免 Mask。参数固定，旧浏览器阈值不再生效。</p>
+      </div>
+      <div class="map-wrap"><img id="lab-map" alt="当前全景图的俯视轮廓与编号相机" hidden><svg id="lab-map-interactive" role="group" aria-label="相机图：绿点候选、红叉超限、橙叉不连通" hidden></svg><div id="lab-map-empty">等待轮廓结果…</div></div>
+      <p id="lab-outline-info" class="muted"></p>
+      <div class="section-head"><div><p class="eyebrow">02 / CAMERA PREVIEW</p><h2 id="lab-preview-title">低清全景预览</h2></div><a id="lab-pano-download" class="button" hidden target="_blank" rel="noopener">打开全景图 ↗</a></div>
+      <div class="preview-controls"><div class="tabs" role="group" aria-label="全景预览方式"><button id="lab-flat" aria-pressed="true">全景展开图</button><button id="lab-look" aria-pressed="false">自由转动视角</button></div><label>FOV <input id="lab-fov" type="number" min="30" max="110" step="5" value="75"></label><button id="lab-reset">恢复朝前</button></div>
+      <div id="lab-mask-views" class="tabs" role="group" aria-label="未知空间遮挡对比" hidden><button data-view="masked" aria-pressed="true">新方案结果</button><button data-view="raw" aria-pressed="false">遮挡前表面图</button><button data-view="mask" aria-pressed="false">最终 Mask</button><button data-view="overlay" aria-pressed="false">Mask 叠加</button><button data-view="unknown" aria-pressed="false">未知空间遮挡</button><button data-view="holes" aria-pressed="false">无可靠表面</button><button data-view="uncertain" aria-pressed="false">不确定路径 / 相机</button><button data-view="reason_color" aria-pressed="false">判定原因</button></div>
+      <p id="lab-mask-warning" class="error" role="status" hidden></p>
+      <p id="lab-mask-legend" class="muted" hidden>白色 Mask＝需要修补；原因：红＝未知空间先遮挡，黄＝无可靠表面，紫＝无效 / 被过滤的路径，蓝＝相机不在已确认空域。原因可以重叠，显示优先级蓝→紫→红→黄。</p>
+      <div id="lab-preview" class="preview" tabindex="0" aria-label="全景预览，拖动或方向键环视，滚轮调整视场角"><img id="lab-panorama" alt="选中采样相机的低清球面全景" hidden><div id="lab-look-canvas" hidden></div><div id="lab-preview-empty">选择一个已完成渲染的相机点。</div><div id="lab-loading" hidden role="status">载入全景图…</div></div>
+      <p id="lab-render-info" class="muted">全景与透视模式来自同一张渲染图；透视模式仅原地转动，不改变相机位置。</p>
+      <p id="lab-error" class="error" role="alert" hidden></p>
+    </section>
+  </main>
+  <script type="module" src="/camera-lab.js"></script>
+</body>
+</html>
