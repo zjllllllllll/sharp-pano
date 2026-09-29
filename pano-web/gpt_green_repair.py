@@ -1,4 +1,4 @@
-"""Regenerate the confirmed camera with green + true-alpha masks.
+"""Regenerate the confirmed camera with green geometry-only masks.
 
 Runs only on explicit user request, using the explicitly configured GPT provider.
 Old captures/depth stay intact. Successful faces resume without another POST.
@@ -14,40 +14,38 @@ import numpy as np
 from PIL import Image
 from novel_pipeline import (read,digest,FACE_NAMES,CAPTURE_VERSION,MASK_COLOR,
                             REPAIR_PROMPT,repair_input)
-from novel_geometry import merge_alpha_holes,six_faces,ALPHA_THRESHOLD,ALPHA_THRESHOLD_U8
 from novel_geometry import repair_masks,repair_faces,MASK_CLEANUP
 from gpt_rgb_experiment import assemble,REFERENCE,MODEL
 from rerun_novel import write,api
 from face_quality_io import assess_rgb
+from face_requests import ordered_face_map
 
-VERSION='gpt-green-alpha070-open3-smooth1-v4-provider'
+VERSION='gpt-green-geometry-open3-smooth1-v5-provider'
 
 
 def validate_capture(folder,preview):
-    if preview.get('capture_version')!=CAPTURE_VERSION:raise ValueError('Fresh alpha capture required')
+    if preview.get('capture_version')!=CAPTURE_VERSION:raise ValueError('Fresh geometry-only capture required')
     capture=folder/preview['path']
     if not capture.resolve().is_relative_to(folder.resolve()):raise ValueError('Invalid capture path')
     for name,expected in [('raw.png',preview['raw_sha256']),('mask.png',preview['mask_sha256'])]:
         if digest(capture/name)!=expected:raise ValueError('Capture changed: '+name)
-    if preview.get('mask_cleanup')!=MASK_CLEANUP or preview.get('alpha_threshold')!=ALPHA_THRESHOLD:
+    if preview.get('mask_cleanup')!=MASK_CLEANUP:
         raise ValueError('Capture mask settings differ from production settings')
     geometry=np.asarray(Image.open(capture/'geometry-mask-raw.png'))>0
     if digest(capture/'geometry-mask-raw.png')!=preview['raw_geometry_sha256']:raise ValueError('Raw geometry mask changed')
-    alphas=[]
     for face in FACE_NAMES:
         path=capture/f'{face}-render-alpha.png'
         if digest(path)!=preview['alpha_faces'][face]['sha256']:raise ValueError('Alpha changed: '+face)
-        alphas.append(np.asarray(Image.open(path)))
-    expected_masks=repair_masks(geometry,alphas)
-    for key,filename in [('geometry','geometry-mask.png'),('alpha','alpha-mask.png'),('raw_alpha','alpha-mask-raw.png')]:
+    expected_masks=repair_masks(geometry)
+    for key,filename in [('geometry','geometry-mask.png')]:
         if not np.array_equal(np.asarray(Image.open(capture/filename))>0,expected_masks[key]):raise ValueError('Mask cleanup mismatch: '+filename)
     mask=np.asarray(Image.open(capture/'mask.png'))>0
-    if not np.array_equal(mask,expected_masks['combined']):raise ValueError('Combined mask differs from cleaned alpha union')
+    if not np.array_equal(mask,expected_masks['combined']):raise ValueError('Repair mask differs from cleaned geometry')
     raw=np.asarray(Image.open(capture/'raw.png').convert('RGB'))
     masked=np.asarray(Image.open(capture/'masked.png').convert('RGB'))
     if not np.all(masked[mask]==MASK_COLOR) or not np.array_equal(masked[~mask],raw[~mask]):
         raise ValueError('Invalid green preview')
-    for face in repair_faces(raw,mask,alphas):
+    for face in repair_faces(raw,mask):
         name=face['name'];expected=face['mask']
         if not np.array_equal(np.asarray(Image.open(capture/f'{name}-mask.png'))>0,expected):
             raise ValueError('Face mask cleanup mismatch: '+name)
@@ -57,18 +55,17 @@ def validate_capture(folder,preview):
 def generate(job,preview,baseline,repair_image,decode_image,key,download_error,preflight=None,*,provider='company'):
     """Dependency injection keeps paid-request/resume behavior testable offline."""
     folder=job/'novel'/baseline['revision'];capture=validate_capture(folder,preview)
-    out=capture/'repair';out.mkdir(exist_ok=True);rows=[];qualities=[];started=time.perf_counter()
+    out=capture/'repair';out.mkdir(exist_ok=True);started=time.perf_counter()
     expected_size=(2048,2048) if provider=='company' else None
     request=dict(version=VERSION,model=MODEL,provider=provider,prompt=REPAIR_PROMPT,image_count=1,
         input_size=[1024,1024],output_size='2048x2048' if expected_size else 'provider-native-square',mask_color=list(MASK_COLOR),
-        mask_source=preview['mask_source'],alpha_threshold=ALPHA_THRESHOLD,mask_cleanup=MASK_CLEANUP)
+        mask_source=preview['mask_source'],mask_cleanup=MASK_CLEANUP)
     write(out/'request.json',request)
-    for face in FACE_NAMES:
+    def repair_face(face):
         base=np.asarray(Image.open(capture/f'{face}.png').convert('RGB'))
         mask=np.asarray(Image.open(capture/f'{face}-mask.png'))>0
         if not mask.any():
-            qualities.append(assess_rgb(capture,face,out))
-            rows.append(dict(face=face,model=MODEL,skipped=True,mask_pixels=0,seconds=0));continue
+            return dict(face=face,model=MODEL,skipped=True,mask_pixels=0,seconds=0),assess_rgb(capture,face,out)
         input_path=out/f'{face}-api-input.png';model_path=out/f'{face}-model.png';receipt=out/f'{face}.json'
         Image.fromarray(repair_input(base,mask)).save(input_path)
         expected=digest(input_path);cached=read(receipt) if receipt.exists() else {}
@@ -76,23 +73,24 @@ def generate(job,preview,baseline,repair_image,decode_image,key,download_error,p
                 and cached.get('request_version')==VERSION and model_path.exists()
                 and cached.get('provider')==provider
                 and cached.get('model_sha256')==digest(model_path)):
-            qualities.append(assess_rgb(capture,face,out))
-            rows.append(cached);print(f'{face}: verified cached GPT result',flush=True);continue
+            quality=assess_rgb(capture,face,out)
+            print(f'{face}: verified cached GPT result',flush=True)
+            return cached,quality
         request_dir=out/f'{face}-{provider}';request_dir.mkdir(exist_ok=True)
         marker=request_dir/'submitted.json'
         if marker.exists():raise RuntimeError(f'{face}: previous POST outcome uncertain; no automatic paid retry')
         # Cached returns need no provider credentials. Validate a live provider
         # before recording any possibly billable submission.
-        if preflight is not None:key=preflight()
+        face_key=preflight() if preflight is not None else key
         write(marker,dict(started=time.time(),input_sha256=expected,request_version=VERSION))
         begin=time.perf_counter();cache={}
         print(f'GPT/{provider} {face}: green mask {mask.mean():.2%}; input 1024x1024',flush=True)
         try:
-            repair_image(input_path,request_dir,MODEL,REPAIR_PROMPT,key,result_cache=cache)
+            repair_image(input_path,request_dir,MODEL,REPAIR_PROMPT,face_key,result_cache=cache)
         except download_error:
             if 'result' not in cache:raise
             # Only redownload the existing response. Never repeat a paid POST.
-            repair_image(input_path,request_dir,MODEL,REPAIR_PROMPT,key,result_cache=cache)
+            repair_image(input_path,request_dir,MODEL,REPAIR_PROMPT,face_key,result_cache=cache)
         model=decode_image((request_dir/'api_original.image').read_bytes()).convert('RGB')
         if expected_size is not None and model.size!=expected_size:
             raise ValueError(f'{face}: unexpected company GPT output size {model.size}')
@@ -102,15 +100,18 @@ def generate(job,preview,baseline,repair_image,decode_image,key,download_error,p
         row=dict(face=face,model=MODEL,skipped=False,mask_pixels=int(mask.sum()),
             seconds=time.perf_counter()-begin,api_input_sha256=expected,model_sha256=digest(model_path),
             prompt=REPAIR_PROMPT,request_version=VERSION,provider=provider,input_size=[1024,1024],output_size=list(model.size))
-        rows.append(row);write(receipt,row)
-        qualities.append(assess_rgb(capture,face,out))
+        write(receipt,row)
+        quality=assess_rgb(capture,face,out)
         print(f'{face}: saved and hashed ({row["seconds"]:.1f}s)',flush=True)
+        return row,quality
+    repaired=ordered_face_map(repair_face,FACE_NAMES)
+    rows=[row for row,quality in repaired];qualities=[quality for row,quality in repaired]
     result=assemble(folder,preview,baseline,MODEL,request,rows,time.perf_counter()-started,qualities)
     result['external_provider']='Company API · GPT Image 2' if provider=='company' else 'GrsAI · GPT Image 2'
-    result['description']='GPT Image 2 绿幕补洞：alpha < 0.70；Mask 做 3×3 开运算、小于 16 像素连通块清理，以及高斯 σ=1 px 羽化后取 50% 边缘。洞内完整生成，RGB 外侧 4 像素羽化。尚未运行新深度。'
+    result['description']='GPT Image 2 绿幕补洞：仅几何未知区域；Mask 做 3×3 开运算、小于 16 像素连通块清理，以及高斯 σ=1 px 羽化后取 50% 边缘。洞内完整生成，RGB 外侧 4 像素羽化。尚未运行新深度。'
     if baseline.get('image'):
-        result['comparison_note']='当前为绿幕 + alpha Mask 重生成。历史版本使用旧黑色 Mask，修补范围和提示词不同；仅用于效果回看。切换历史版本不会改变后续输入。'
-        result['comparison_variants']=[dict(id='gpt',label='GPT · 绿幕 + alpha',
+        result['comparison_note']='当前为绿幕 + 几何 Mask 重生成。历史版本使用旧黑色 Mask，修补范围和提示词不同；仅用于效果回看。切换历史版本不会改变后续输入。'
+        result['comparison_variants']=[dict(id='gpt',label='GPT · 绿幕 + 几何',
             path=f'{preview["path"]}/repair/repair.json',image=result['image']),
             dict(id='gpt-black',label='历史 GPT · 黑色 Mask',
             path=f'{baseline["capture"]["path"]}/repair/repair.json',image=baseline['image'])]
@@ -153,7 +154,7 @@ def run(job,port):
         if (job/name).exists():shutil.copy2(job/name,backup/name)
     shutil.copy2(folder/'selection.json',backup/'selection.json')
     state.update(busy=True,running_stage=7,rgb_repair_run=preview['path'],error=None,
-        message='正在用绿幕 + alpha Mask 重新生成 GPT 六面图片')
+        message='正在用绿幕 + 几何 Mask 重新生成 GPT 六面图片')
     write(job/'job.json',state)
     try:
         result=generate(job,preview,baseline,repair_image,decode_image,key,ImageDownloadError,provider=provider)
@@ -168,7 +169,7 @@ def run(job,port):
         old_depth=current['stages'].pop('8',None)
         if old_depth:current['archived_depth_before_rgb_test']=dict(path=old_depth['path'],backup=str(backup/'stage-8.json'))
         current['stages']['7']=result
-        current.update(busy=False,running_stage=None,error=None,message='GPT 绿幕 + alpha 六面补洞已完成；新深度尚未生成')
+        current.update(busy=False,running_stage=None,error=None,message='GPT 绿幕 + 几何 六面补洞已完成；新深度尚未生成')
         current.pop('rgb_repair_run',None)
         write(job/'stage-7.json',result);write(job/'job.json',current)
         write(backup/'publication.json',dict(capture=preview['path'],image=result['image'],image_sha256=result['image_sha256']))

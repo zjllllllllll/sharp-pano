@@ -1,0 +1,17 @@
+/* Keep every diagnostic in the debug interface; default shows the main viewer. */
+.header-actions { display:flex; align-items:center; gap:24px; }
+.mode-select { display:flex; align-items:center; gap:10px; white-space:nowrap; color:var(--muted); font-size:13px; }
+.mode-select select { padding:8px 12px; border:1px solid #344031; border-radius:7px; color:#dce5db; background:#171d19; }
+.auto-note { color:#9da99e; font-size:12px; line-height:1.8; margin-top:16px; }
+body[data-mode="debug"] .auto-note { display:none; }
+body[data-mode="auto"] :is(#health,.local-note,.camera-lab-link,#branch-info,
+  #gaussian-repair-control,#novel-panel,#repair-panel,#normal-control,#densify-control,
+  #gaussian-densify-control,#preload-status,#gaussian-mask-control,.details,
+  #compare-tools,#debug-panel,#next,#gray,#point-control,#view-hint,
+  .camera-labels,.camera-popup,.pipeline-current,.repair-loop-feedback,
+  .repair-loop-return,#pipeline-running,.step small) { display:none !important; }
+body[data-mode="auto"] .step { min-height:54px; }
+body[data-mode="auto"] .repair-loop-track { padding-right:0; }
+body[data-mode="auto"].auto-processing :is(#three-view,#image-view,#view-tools,#download) { visibility:hidden; }
+body[data-mode="auto"].auto-processing #view-loading { display:flex !important; }
+@media(max-width:720px) { .header-actions { gap:10px; } .mode-select { gap:5px; } }

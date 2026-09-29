@@ -1,10 +1,20 @@
 import * as THREE from 'three';
 import {ViewCache} from './view-cache.mjs';
+import {visibleStep, displayStep, latestVisibleStep, nextAutomaticStage} from './workflow-mode.mjs';
 import {NovelView} from './novel-view.js';
 import {FIXED_NORMAL_ANGLE, DISTANCE_NEIGHBORS, angleStatistics, visibleAt,
   FIXED_DISTANCE_NEIGHBORS, FIXED_DISTANCE_CM, distanceStatistics, distanceCounts, attachAngleShader} from './point-filter.mjs';
 
 const $ = id => document.getElementById(id);
+const mode=new URLSearchParams(location.search).get('mode')==='debug'?'debug':'auto';
+const automatic=mode==='auto';
+document.body.dataset.mode=mode;$('mode').value=mode;
+$('mode-title').textContent=automatic?'默认模式':'调试模式';
+document.title=`SHARP · ${automatic?'全景生成':'调试模式'}`;
+$('empty').querySelector('p').textContent=automatic?'上传全景图，自动生成完整场景':'上传后，逐步查看深度、点云和高斯的变化';
+$('mode').onchange=()=>{const url=new URL(location.href);url.searchParams.set('mode',$('mode').value);location.assign(url);};
+let advancing=false, automaticFailed=null, initializing=true, viewSelections=0;
+
 const names = ['全景图', '全景深度图', '反投影点云', '初始化高斯', '调整后的高斯','候选相机','六面补洞','深度补全','高斯补洞'];
 const subtitles = ['RGB 输入', 'DepthMaster · 径向距离', '全景深度 · 直接反投影', 'SHARP · 未加预测修正', 'SHARP · 最终预测','高斯场景 · 全局四邻域','RGB 补洞 · 外羽化','高斯深度 · LingBot','SHARP · 深度锚定补丁'];
 names.push('候选相机 · 第二轮','六面补洞 · 第二轮','深度补全 · 第二轮','高斯补洞 · 第二轮');
@@ -217,7 +227,7 @@ function showError(message) { $('error').textContent = message || ''; $('error')
 async function api(url, options = {}) {
   const response = await fetch(url, {...options, headers: {...options.headers, 'X-Local-Token': token}});
   const value = await response.json();
-  if (!response.ok) throw new Error(value.error || `请求失败 (${response.status})`);
+  if (!response.ok) {const error=new Error(value.error || `请求失败 (${response.status})`);error.status=response.status;throw error;}
   return value;
 }
 function artifact(name) { return `/artifacts/${job.id}/${name}`; }
@@ -227,20 +237,21 @@ function pipelineStepCount(){
   const last=Math.max(9,next,job?.running_stage||0);
   return 5+4*Math.ceil((last-5)/4);
 }
-function canViewStep(step){return !!job?.stages[String(step)]||(localStep(step)>=7&&job?.running_stage===step)||(step===7&&job?.mask_update_pending);}
+function canViewStep(step){if(automatic)return !!job?.stages[String(step)];return !!job?.stages[String(step)]||(localStep(step)>=7&&job?.running_stage===step)||(step===7&&job?.mask_update_pending);}
 function setSelectedStep(step){
-  selected=step;
+  selected=step;document.body.classList.remove('auto-processing');
   const url=new URL(location.href);url.searchParams.set('job',job.id);url.searchParams.set('step',String(step));
   history.replaceState(null,'',url);
 }
 function renderStepList(container,steps){
+  steps=steps.filter(step=>visibleStep(step,mode));
   const key=steps.join(',');
   if(container.dataset.steps!==key){
     container.dataset.steps=key;
     container.replaceChildren(...steps.map(step=>{
       const button=document.createElement('button');button.type='button';button.dataset.step=String(step);
-      const num=document.createElement('span');num.className='num';num.textContent=String(step).padStart(2,'0');
-      const text=document.createElement('span');text.className='name';text.append(document.createTextNode(names[localStep(step)-1]),document.createElement('small'));
+      const num=document.createElement('span');num.className='num';num.textContent=String(displayStep(step,mode)).padStart(2,'0');
+      const text=document.createElement('span');text.className='name';text.append(document.createTextNode(automatic&&step>=6?'修补结果':names[localStep(step)-1]),document.createElement('small'));
       const status=document.createElement('span');status.className='step-status';
       button.append(num,text,status);button.onclick=()=>selectStep(step);return button;
     }));
@@ -248,9 +259,9 @@ function renderStepList(container,steps){
   for(const button of container.children){
     const step=Number(button.dataset.step),done=!!job?.stages[String(step)],running=job?.busy&&job.running_stage===step;
     button.className=`step${selected===step?' active':''}${done?' done':''}${running?' running':''}`;
-    button.disabled=novel.busy||!canViewStep(step);
+    button.disabled=advancing||qualityResuming||novel.busy||!canViewStep(step);
     button.setAttribute('aria-current',selected===step?'step':'false');
-    button.setAttribute('aria-label',`第 ${step} 步 ${names[localStep(step)-1]}`);
+    button.setAttribute('aria-label',`第 ${displayStep(step,mode)} 步 ${names[localStep(step)-1]}`);
     button.querySelector('small').textContent=running?'正在生成…':step===3&&done&&job.stages['3'].diagnostics?.learned_alignment!==false?'SHARP · 初始中心':step>=10&&localStep(step)===6?'累计可信空间 · 最大 Mask':subtitles[localStep(step)-1];
     const status=button.querySelector('.step-status');status.textContent=running?'…':done?'✓':'';
     status.setAttribute('aria-label',running?'正在生成':done?'已生成':'尚未生成');
@@ -266,9 +277,9 @@ function renderNavigation(){
   }
   const count=pipelineStepCount(),roundCount=Math.ceil((count-5)/4);
   const latest=Math.max(1,repairRound(Math.max(job?.running_stage||0,...Object.keys(job?.stages||{}).map(Number))));
-  $('pipeline-summary').textContent=`${count} 个步骤 · ${roundCount} 轮修补`;
+  $('pipeline-summary').textContent=automatic?'自动生成':`${count} 个步骤 · ${roundCount} 轮修补`;
   const initialDone=[1,2,3,4,5].filter(step=>job?.stages[String(step)]).length;
-  $('initial-stage-status').textContent=`01—05 · ${initialDone===5?'已完成':`${initialDone}/5`}`;
+  $('initial-stage-status').textContent=automatic?(!job?'未开始':initialDone===5?'已完成':'生成中'):`01—05 · ${initialDone===5?'已完成':`${initialDone}/5`}`;
   renderStepList($('initial-steps'),[1,2,3,4,5]);
   const picker=$('repair-round');
   if(picker.options.length!==roundCount)picker.replaceChildren(...Array.from({length:roundCount},(_,i)=>{const option=document.createElement('option');option.value=String(i+1);return option;}));
@@ -277,21 +288,21 @@ function renderNavigation(){
     const camera=stages[3]?.camera_id||stages[2]?.camera_id||stages[1]?.camera_id||stages[0]?.current?.camera_id||stages[0]?.recommended;
     const generated=stages.filter(Boolean).length,review=stages[3]?.acceptance?.status==='review_required';
     const running=job?.busy&&repairRound(job.running_stage)===round;
-    option.textContent=`第 ${round} 轮${camera?` · ${camera}`:''} · ${running?'生成中':review?'待复核':generated===4?'已完成':generated?`${generated}/4`:'未开始'}`;
-    option.disabled=![0,1,2,3].some(i=>canViewStep(start+i));
+    option.textContent=automatic?`第 ${round} 轮 · ${generated===4?'已完成':running||generated?'生成中':'未开始'}`:`第 ${round} 轮${camera?` · ${camera}`:''} · ${running?'生成中':review?'待复核':generated===4?'已完成':generated?`${generated}/4`:'未开始'}`;
+    option.disabled=automatic?!canViewStep(start+3):![0,1,2,3].some(i=>canViewStep(start+i));
   }
-  picker.value=String(navigationRound);picker.disabled=novel.busy||![...picker.options].some(option=>!option.disabled);
+  picker.value=String(navigationRound);picker.disabled=advancing||qualityResuming||novel.busy||![...picker.options].some(option=>!option.disabled);
   const start=roundStart(navigationRound),completed=[0,1,2,3].filter(i=>job?.stages[String(start+i)]).length;
   const review=job?.stages[String(start+3)]?.acceptance?.status==='review_required';
-  $('repair-round-status').textContent=`${navigationRound<latest?'历史轮次':navigationRound===latest?'最新一轮':'待开始轮次'} · ${review?'已生成，补丁覆盖率待复核':completed===4?'4/4 已完成':`${completed}/4 已完成`}`;
+  $('repair-round-status').textContent=automatic?(completed===4?'修补结果已生成':'等待修补结果'):`${navigationRound<latest?'历史轮次':navigationRound===latest?'最新一轮':'待开始轮次'} · ${review?'已生成，补丁覆盖率待复核':completed===4?'4/4 已完成':`${completed}/4 已完成`}`;
   renderStepList($('repair-steps'),[start,start+1,start+2,start+3]);
   $('pipeline-running').hidden=!job?.busy;
   if(job?.busy)$('pipeline-running').textContent=`正在运行：${repairRound(job.running_stage)?`第 ${repairRound(job.running_stage)} 轮 · `:''}${names[localStep(job.running_stage)-1]}`;
-  $('pipeline-current-step').textContent=`STEP ${String(selected).padStart(2,'0')} · ${selected<=5?'首次生成':`第 ${repairRound(selected)} 轮`} · ${names[localStep(selected)-1]}`;
+  $('pipeline-current-step').textContent=`STEP ${String(displayStep(selected,mode)).padStart(2,'0')} · ${selected<=5?'首次生成':`第 ${repairRound(selected)} 轮`} · ${names[localStep(selected)-1]}`;
 }
 $('repair-round').onchange=async()=>{
   const start=roundStart(Number($('repair-round').value)),target=start+(selected>=6?localStep(selected)-6:0);
-  const available=[start,start+1,start+2,start+3].filter(canViewStep);
+  const available=[start,start+1,start+2,start+3].filter(step=>visibleStep(step,mode)&&canViewStep(step));
   if(available.length)await selectStep(available.includes(target)?target:available.at(-1));
   else renderNavigation();
 };
@@ -306,7 +317,7 @@ function renderState() {
     const source=document.createElement('a');source.textContent='查看原流程';source.href=`/?job=${job.branch.source_job}&step=9`;branch.append(source);
   }
   renderNavigation();
-  $('next').disabled = !job || job.busy || novel.busy || loadingUpload || stopped || atLimit || denseRequests.size>0 || gaussianDensePending;
+  $('next').disabled = advancing || !job || job.busy || novel.busy || loadingUpload || stopped || atLimit || denseRequests.size>0 || gaussianDensePending;
   const phase=localStep(done);
   $('next').textContent = !job ? '请先上传全景图' : job.busy ? '正在生成…' : novel.busy?'正在渲染…':stopped ? '迭代已停止 ✓' : atLimit ? '已达到 5 轮上限'  : phase===6?`确认推荐相机 · ${gpt?'GPT Image 2':'Seedream'} 补洞 →`:phase===7?'渲染深度 · LingBot 补全 →':phase===8?'SHARP 生成补丁 · 合并高斯 →':`生成${stepName(done+1)} →`;
   if(job?.quality_run?.status==='awaiting_capture'){
@@ -315,10 +326,15 @@ function renderState() {
   if(['exhausted','cancelled'].includes(job?.quality_run?.status)){
     $('next').disabled=true;$('next').textContent='本轮未找到可用修补';
   }
-  $('file').disabled = !!job?.busy || novel.busy || loadingUpload || denseRequests.size>0 || gaussianDensePending;
+  $('file').disabled = advancing || qualityResuming || !!job?.busy || novel.busy || loadingUpload || denseRequests.size>0 || gaussianDensePending;
   $('progress').max=total;$('progress').value = done;
   document.body.classList.toggle('busy', !!job?.busy);
-  $('progress-label').textContent = job ? `${done} / ${total} 已完成 · ${job.message}` : '等待上传全景图';
+  $('progress-label').textContent = automatic ? !job?'等待上传全景图':
+    job.error||automaticFailed===job.id?'生成已暂停，请切换调试模式查看':
+    ['exhausted','cancelled'].includes(job.quality_run?.status)?'本轮修补已结束':
+    stopped||atLimit?'生成完成':job.busy||advancing||qualityResuming?
+    ((job.running_stage||done+1)>=6?`正在进行第 ${repairRound(job.running_stage||done+1)} 轮修补…`:'正在生成场景…'):
+    job.execution_mode==='auto'?'自动生成中…':'已有结果' : job ? `${done} / ${total} 已完成 · ${job.message}` : '等待上传全景图';
   $('novel-render').disabled=novel.busy||!!job?.busy;
   if (job?.error) showError(job.error);
   $('compare').disabled = !job?.stages['5'];
@@ -481,7 +497,7 @@ async function resolveDenseInfo(jid,step) {
 }
 async function preloadAll() {
   const jid=job?.id;
-  if(!jid || preloadJob===jid || job.busy || gaussianDensePending) return;
+  if(automatic || !jid || preloadJob===jid || job.busy || gaussianDensePending) return;
   preloadJob=jid;
   try {
     init3D();
@@ -543,7 +559,13 @@ function resetView() {
 function transformImage() {$('result-image').style.transform=`translate(${imgX}px,${imgY}px) scale(${imgScale})`;}
 
 async function selectStep(step) {
+  viewSelections++;
+  try {return await loadSelectedStep(step);}
+  finally {viewSelections--;}
+}
+async function loadSelectedStep(step) {
   if(novel.busy)return;
+  if(!visibleStep(step,mode))step=latestVisibleStep(job,mode,step);
   if(step>=6)return selectNovelStep(step);
   if (!job?.stages[String(step)]) return;
   novel.hide();$('gaussian-repair-control').hidden=true;$('viewport').hidden=false;
@@ -557,7 +579,7 @@ async function selectStep(step) {
   }
   const result=gaussianResult(job.stages[String(step)]);
   renderState();showError(job.error);
-  $('title').textContent=stepName(step);$('step-index').textContent=`STEP ${String(step).padStart(2,'0')}`;
+  $('title').textContent=stepName(step);$('step-index').textContent=`STEP ${String(displayStep(step,mode)).padStart(2,'0')}`;
   $('description').textContent=step===1?'原始 2:1 全景图。前六步在本机计算；第七步逐面补洞，每次仅向 Seedream 发送一张 1024×1024 待补图，不发送参考图。':result.description;metadata(result);
   $('empty').hidden=true;$('download').hidden=false;
   $('download').href=artifact(result.download)+'?download=1';
@@ -635,7 +657,7 @@ async function selectNovelStep(step){
   $('gaussian-repair-control').hidden=true;
   if(!stages[6] || (phase>=7&&!job.stages[String(step)]&&job.running_stage!==step&&!(step===7&&job.mask_update_pending)))return;
   ensureCacheJob();setSelectedStep(step);const serial=++viewSerial;novel.hide();disposeObject();renderState();showError(job.error);
-  $('title').textContent=stepName(step);$('step-index').textContent=`STEP ${String(step).padStart(2,'0')}`;
+  $('title').textContent=stepName(step);$('step-index').textContent=`STEP ${String(displayStep(step,mode)).padStart(2,'0')}`;
   for(const id of ['empty','image-view','normal-control','densify-control','gaussian-mask-control','gaussian-densify-control','point-control','gray'])$(id).hidden=true;
   $('view-loading').hidden=true;$('viewport').hidden=phase>=7;$('three-view').hidden=phase!==6;
   $('compare-tools').hidden=phase!==6;$('view-tools').hidden=phase!==6;$('download').hidden=true;
@@ -702,13 +724,14 @@ async function selectGaussianRepair(step=9){
   if(!stages[8]||(!stages[9]&&job.running_stage!==step))return;
   ensureCacheJob();setSelectedStep(step);const serial=++viewSerial;novel.hide();disposeObject();renderState();showError(job.error);
   const result=stages[9];
-  $('title').textContent=stepName(step);$('step-index').textContent=`STEP ${String(step).padStart(2,'0')}`;
+  $('title').textContent=stepName(step);$('step-index').textContent=`STEP ${String(displayStep(step,mode)).padStart(2,'0')}`;
   for(const id of ['empty','image-view','normal-control','densify-control','gaussian-mask-control','gaussian-densify-control','point-control','gray'])$(id).hidden=true;
   $('viewport').hidden=!result;$('three-view').hidden=!result;$('compare-tools').hidden=!result;$('view-tools').hidden=!result;
   $('gaussian-repair-control').hidden=!result;$('download').hidden=!result;$('view-loading').hidden=true;
   $('description').textContent=roundDescription(result?.description||'正在用当前 RGB 和 LingBot 深度运行参考 SHARP 补洞流程；原始高斯保留。',step);
   $('metrics').textContent='';$('preload-status').textContent='';
-  novel.showGaussianRepair(jid,result,stages[8]);
+  if(automatic){repairMode='merged';novel.jid=jid;novel.state={revision:result?.revision};}
+  else novel.showGaussianRepair(jid,result,stages[8]);
   if(!result)return;
   metadata(result);$('view-loading').hidden=false;$('view-loading').textContent='载入首次高斯与历轮补丁…';
   for(const mode of ['base','patch','merged'])$(`repair-${mode}`).disabled=true;
@@ -736,28 +759,38 @@ async function selectGaussianRepair(step=9){
 }
 
 async function upload(file) {
-  if(!file||job?.busy||novel.busy||loadingUpload||denseRequests.size>0||gaussianDensePending) return;
+  if(!file||advancing||qualityResuming||job?.busy||novel.busy||loadingUpload||denseRequests.size>0||gaussianDensePending) return;
   if(file.size>80*1024*1024) return showError('图片不能超过 80 MB');
   loadingUpload=true;renderState();showError(null);$('upload-status').textContent='正在上传并检查全景图…';
   try {
-    job=await api('/api/upload',{method:'POST',body:file,headers:{'Content-Type':file.type||'application/octet-stream'}});
-    savedPose=null;$('restore-pose').disabled=true;resetView();await selectStep(1);$('upload-status').textContent=file.name;
-  } catch(error) {showError(error.message);$('upload-status').textContent='上传失败，请重新选择图片';}
+    job=await api('/api/upload',{method:'POST',body:file,headers:{'Content-Type':file.type||'application/octet-stream','X-Workflow-Mode':mode}});
+    automaticFailed=null;qualityResumeFailed=null;savedPose=null;$('restore-pose').disabled=true;resetView();await selectStep(1);$('upload-status').textContent=file.name;
+  } catch(error) {showError(error.message);$('upload-status').textContent='上传失败，请重新选择图片';return;}
   finally {loadingUpload=false;renderState();$('file').value='';}
+  await advanceAutomatically();
 }
 $('file').addEventListener('change',event=>upload(event.target.files[0]));
 for(const type of ['dragenter','dragover']) $('drop').addEventListener(type,event=>{event.preventDefault();$('drop').classList.add('over');});
 for(const type of ['dragleave','drop']) $('drop').addEventListener(type,event=>{event.preventDefault();$('drop').classList.remove('over');});
 $('drop').addEventListener('drop',event=>upload(event.dataTransfer.files[0]));
-$('next').onclick=async()=>{
-  if(!job||job.busy) return;
+async function advanceStep(expectedStage=null){
+  if(!job||job.busy||advancing) return;
   if(job.quality_run?.status==='awaiting_capture'){qualityResumeFailed=null;await resumeQualityCapture();return;}
-  $('next').disabled=true;showError(null);
+  advancing=true;renderState();showError(null);
   try {
-    const next=Object.keys(job.stages).length+1;
-    if(localStep(next)===7){if(selected!==next-1)await selectStep(next-1);await novel.ensureRecommended();}
+    const next=expectedStage??Object.keys(job.stages).length+1;
+    if(localStep(next)===7){
+      if(automatic)await prepareAutomaticCapture(next-1);
+      else {if(selected!==next-1)await selectStep(next-1);await novel.ensureRecommended();}
+    }
     job=await api(`/api/jobs/${job.id}/next`,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({gaussian_variant:gaussianDense?'dense':gaussianVariant})});renderState();
+      body:JSON.stringify({expected_stage:next,gaussian_variant:automatic?'masked':gaussianDense?'dense':gaussianVariant})});renderState();
+    if(automatic){
+      // The completed result remains visible while the next stage runs.
+      viewCache.retain(activeEntry);
+      if(!job.busy&&visibleStep(Object.keys(job.stages).length,mode))await selectStep(Object.keys(job.stages).length);
+      return;
+    }
     if(localStep(next)===8||localStep(next)===9){disposeObject();viewCache.clear();await selectStep(next);return;}
     if(localStep(next)===7){await selectStep(next);return;}
     if(localStep(next)===6)return;
@@ -765,8 +798,43 @@ $('next').onclick=async()=>{
     disposeObject();viewCache.clear();
     $('preload-status').textContent='模型生成期间已释放三维缓存，完成后自动重新预加载。';
   }
-  catch(error) {showError(error.message);renderState();}
-};
+  catch(error) {
+    if(automatic&&error.status===409){
+      try {job=await api(`/api/jobs/${job.id}`);}
+      catch(refreshError){automaticFailed=job.id;showError(refreshError.message);}
+    }
+    else {if(automatic)automaticFailed=job.id;showError(error.message);}
+  } finally {advancing=false;renderState();}
+}
+$('next').onclick=()=>advanceStep();
+async function advanceAutomatically(){
+  if(!automatic||viewSelections||advancing||polling||qualityResuming||loadingUpload||automaticFailed===job?.id)return;
+  const next=nextAutomaticStage(job);if(next!==null)await advanceStep(next);
+}
+async function prepareAutomaticCapture(step){
+  const jid=executionJob(step),previousStep=selected;
+  const pose=camera?{position:camera.position.clone(),yaw,pitch,fov:camera.fov}:null;
+  ensureCacheJob();++viewSerial;disposeObject();
+  document.body.classList.add('auto-processing');$('viewport').hidden=false;
+  $('view-loading').textContent=`正在采集第 ${repairRound(step)} 轮修补视图…`;
+  try {
+    init3D();resize();
+    const state=await api(`/api/jobs/${jid}/novel`);
+    if(step<10)await resolveDenseInfo(job.id,5);
+    const source=step>=10?{sha256:state.source.sha256,variants:{masked:{preview:state.source.file,count:state.source.count,sha256:state.source.sha256}}}:job.stages['5'];
+    const entry=await gaussianEntry(jid,step>=10?10:5,source);
+    gaussianVariant=state.source.variant==='unmasked'?'unmasked':'masked';gaussianDense=state.source.variant==='dense';
+    activeEntry=entry;showGaussians(entry);entry.root.visible=true;object=entry.root;
+    await novel.show(jid,state);
+    await novel.ensureRecommended();
+    return state;
+  } finally {
+    novel.hide();disposeObject();
+    await selectStep(previousStep);
+    if(pose&&camera){camera.position.copy(pose.position);yaw=pose.yaw;pitch=pose.pitch;camera.rotation.set(pitch,yaw,0);camera.fov=pose.fov;camera.updateProjectionMatrix();}
+    viewCache.retain(activeEntry);
+  }
+}
 $('reset').onclick=resetView;
 $('gray').onclick=async()=>{
   gray=!gray;const expected=gray,serial=viewSerial;
@@ -896,29 +964,36 @@ async function resumeQualityCapture(){
   if(!run||run.status!=='awaiting_capture'||qualityResuming||qualityResumeFailed===run.pending_id)return;
   qualityResuming=true;const jid=job.id,attempt=run.pending_id;
   try{
-    await selectStep(run.round_start);
+    const captureState=automatic?await prepareAutomaticCapture(run.round_start):null;
+    if(!automatic)await selectStep(run.round_start);
     if(job?.id!==jid||job.quality_run?.pending_id!==attempt)return;
-    if(novel.state?.source?.sha256!==run.source_sha256||novel.state?.highlighted!==run.pending_camera)throw new Error('待采集相机或场景已改变');
-    await novel.ensureRecommended();
+    if((captureState||novel.state)?.source?.sha256!==run.source_sha256||(captureState||novel.state)?.highlighted!==run.pending_camera)throw new Error('待采集相机或场景已改变');
+    if(!automatic)await novel.ensureRecommended();
     job=await api(`/api/jobs/${jid}/quality/resume`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({attempt_id:attempt})});
-    disposeObject();viewCache.clear();renderState();await selectStep(run.next_stage);
-  }catch(error){qualityResumeFailed=attempt;showError('自动采集暂停：'+error.message+'；可点击继续重试采集。');}
+    if(automatic)viewCache.retain(activeEntry);
+    else {disposeObject();viewCache.clear();await selectStep(run.next_stage);}
+    renderState();
+  }catch(error){qualityResumeFailed=attempt;if(automatic)automaticFailed=jid;showError('自动采集暂停：'+error.message+(automatic?'；请切换调试模式查看。':'；可点击继续重试采集。'));}
   finally{qualityResuming=false;renderState();}
 }
 setInterval(async()=>{
-  if((!job?.busy&&job?.quality_run?.status!=='awaiting_capture')||polling||qualityResuming) return;polling=true;
+  if(initializing||polling||qualityResuming||advancing||loadingUpload)return;
+  if(!job?.busy&&job?.quality_run?.status!=='awaiting_capture'){await advanceAutomatically();return;}
+  polling=true;
   const jid=job.id, previous=Object.keys(job.stages).length;
   const previousSelected=JSON.stringify(job.stages[String(selected)]);
   try {
     const updated=await api(`/api/jobs/${jid}`);
     if(job.id!==jid) return;
     job=updated;renderState();showError(job.error);
-    if(job.quality_run?.status==='awaiting_capture'){await resumeQualityCapture();return;}
+    if(job.quality_run?.status==='awaiting_capture'&&(!automatic||job.execution_mode==='auto')){await resumeQualityCapture();return;}
     const completed=Object.keys(job.stages).length;
-    if(completed>previous) await selectStep(completed);
+    if(automatic&&!job.busy&&(job.error||['exhausted','cancelled','error'].includes(job.quality_run?.status)))await selectStep(latestVisibleStep(job,mode));
+    else if(completed>previous&&visibleStep(completed,mode)) await selectStep(completed);
     else if(previousSelected!==JSON.stringify(job.stages[String(selected)])) await selectStep(selected);
   } catch(error) {showError(`获取进度失败：${error.message}`);}
   finally {polling=false;}
+  await advanceAutomatically();
 },1200);
 try {
   const state=await api('/api/state');token=state.token;job=state.job;
@@ -929,4 +1004,6 @@ try {
     const requested=Number(new URLSearchParams(location.search).get('step'));
     await selectStep(job.stages[String(requested)]||job.running_stage===requested||(requested===7&&job.mask_update_pending)?requested:Object.keys(job.stages).length);
   }
+  await advanceAutomatically();
 } catch(error) {showError(`连接本机服务失败：${error.message}`);}
+finally {initializing=false;}

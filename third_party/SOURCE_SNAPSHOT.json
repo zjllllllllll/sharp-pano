@@ -118,12 +118,12 @@
     },
     {
       "path": "repair/merge_hard_patch.py",
-      "sha256": "a81d22b965ff371bd3fb0d2c18e29469c316687518f63379dafc7c3bb3073c61",
+      "sha256": "ccd0e703d357e5f84c82a840ac66f0606cf9c9a176d2920eac2b93734d0b32e4",
       "hash_mode": "utf8-lf"
     },
     {
       "path": "repair/run_sharp_hard_depth.py",
-      "sha256": "99060dca873d1a1a05870b771cc4acb1433ec61dab521e7369c4342c7d758207",
+      "sha256": "0c8db21b8e295f5d816d0c19831cc1dc02ba9af57ae03c0e212acab6a1b2ee22",
       "hash_mode": "utf8-lf"
     },
     {

@@ -22,3 +22,15 @@ test('new version evicts only the old resource',async()=>{
   await cache.get('a',async()=>1);await cache.get('b',async()=>2);
   cache.delete('a');assert.deepEqual(disposed,[1]);assert.equal(cache.peek('b'),2);
 });
+
+test('background generation keeps only the visible viewer and discards late previews',async()=>{
+  const disposed=[],cache=new ViewCache(value=>disposed.push(value));
+  const active=await cache.get('active',async()=>({id:'active'}));
+  const unused=await cache.get('unused',async()=>({id:'unused'}));
+  let finish;const late=cache.get('late',()=>new Promise(resolve=>finish=resolve));
+  await Promise.resolve();cache.retain(active);
+  const lateValue={id:'late'};finish(lateValue);
+  await assert.rejects(late,/失效/);
+  assert.deepEqual(disposed,[unused,lateValue]);assert.equal(cache.peek('active'),active);
+  cache.retain(null);assert.equal(cache.ready,0);assert.equal(disposed.at(-1),active);
+});

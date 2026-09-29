@@ -13,5 +13,6 @@ export class ViewCache {
   }
   clear() {this.generation++;for(const entry of this.entries.values())if(entry.value)this.dispose(entry.value);this.entries.clear();}
   delete(key) {const entry=this.entries.get(key);this.entries.delete(key);if(entry?.value)this.dispose(entry.value);}
+  retain(value) {for(const [key,entry] of this.entries)if(!value || entry.value!==value)this.delete(key);}
   get ready() {return [...this.entries.values()].filter(e=>e.value).length;}
 }

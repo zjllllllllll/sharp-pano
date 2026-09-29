@@ -2,11 +2,11 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>SHARP · 效果验证与调试</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/debug.css"><link rel="stylesheet" href="/novel.css">
+  <title>SHARP · 全景生成</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/debug.css"><link rel="stylesheet" href="/novel.css"><link rel="stylesheet" href="/mode.css">
   <script type="importmap">{"imports":{"three":"/vendor/three/build/three.module.js","three/addons/":"/vendor/three/examples/jsm/","@sparkjsdev/spark":"/vendor/@sparkjsdev/spark/dist/spark.module.js"}}</script>
 </head>
-<body>
-  <header><div class="brand"><span class="mark">S</span><strong>SHARP <span>效果验证与调试</span></strong></div><span id="health">检查本机模型…</span></header>
+<body data-mode="auto">
+  <header><div class="brand"><span class="mark">S</span><strong>SHARP <span id="mode-title">默认模式</span></strong></div><div class="header-actions"><label class="mode-select">模式 <select id="mode" aria-label="显示模式"><option value="auto">默认模式</option><option value="debug">调试模式</option></select></label><span id="health">检查本机模型…</span></div></header>
   <main>
     <aside>
       <div class="section-label">PIPELINE <span id="pipeline-summary">13 个步骤 · 2 轮修补</span></div>
@@ -25,23 +25,23 @@
         </section>
         <div class="pipeline-current"><span>当前查看</span><p id="pipeline-current-step" role="status">STEP 01 · 首次生成 · 全景图</p></div>
       </nav>
-      <a href="http://127.0.0.1:8769/camera-lab" target="camera-sampling-lab" rel="noopener" style="display:block;margin:18px 0;padding:12px;border:1px solid #42533b;border-radius:6px;color:#c6f585;text-decoration:none;font-size:13px">相机采样实验 ↗<span style="display:block;color:#91a28c;font-size:11px;margin-top:5px">独立栏目 · 固定 15% / 连通候选 / 全景预览</span></a>
+      <a class="camera-lab-link" href="http://127.0.0.1:8769/camera-lab" target="camera-sampling-lab" rel="noopener" style="display:block;margin:18px 0;padding:12px;border:1px solid #42533b;border-radius:6px;color:#c6f585;text-decoration:none;font-size:13px">相机采样实验 ↗<span style="display:block;color:#91a28c;font-size:11px;margin-top:5px">独立栏目 · 固定 15% / 连通候选 / 全景预览</span></a>
       <div class="upload-card" id="drop"><div class="upload-icon">＋</div><strong>上传一张全景图</strong><p>2:1 全景 · PNG / JPG / WebP<br>文件不超过 80 MB</p><label class="upload-button" for="file">选择图片</label><input id="file" type="file" accept="image/png,image/jpeg,image/webp"><span id="upload-status" role="status">也可以将图片拖到这里</span></div>
-      <div class="local-note">前六步与第八、九步本地运行<br>第七步：云端图片修复<br>Seedream / GPT 公司 API 测试<br>第九步：SHARP 深度锚定补丁</div>
+      <p class="auto-note">上传后自动生成并迭代修补，请保持此网页打开。</p><div class="local-note">前六步与第八、九步本地运行<br>第七步：云端图片修复<br>Seedream / GPT 公司 API 测试<br>第九步：SHARP 深度锚定补丁</div>
     </aside>
     <section class="workspace">
       <p id="branch-info" class="novel-privacy" hidden></p>
       <div class="view-heading"><div><div class="eyebrow" id="step-index">STEP 01</div><h1 id="title">全景图</h1></div><a id="download" class="secondary" hidden>下载结果 ↗</a></div>
       <section id="gaussian-repair-control" class="normal-panel" hidden aria-label="高斯补洞结果切换"><div class="novel-actions"><button id="repair-base" aria-pressed="false">原始高斯</button><button id="repair-patch" aria-pressed="false">仅新增补丁</button><button id="repair-merged" aria-pressed="true">合并后</button></div><p id="gaussian-repair-status" role="status"></p></section>
       <div class="viewport" id="viewport">
-        <div id="empty"><div class="empty-symbol">◉</div><h2>从一张全景图开始</h2><p>上传后，逐步查看深度、点云和高斯的变化</p></div>
+        <div id="empty"><div class="empty-symbol">◉</div><h2>从一张全景图开始</h2><p>上传全景图，自动生成完整场景</p></div>
         <div id="image-view" hidden><img id="result-image" alt="当前步骤结果" draggable="false"></div>
         <div id="three-view" hidden tabindex="0" aria-label="三维结果，拖动环视，WASD 移动"></div>
         <div id="view-loading" hidden role="status">正在载入三维结果…</div>
         <div class="view-toolbar" id="view-tools" hidden><button id="reset">重置视角</button><button id="gray" hidden>切换灰度</button><label id="point-control" hidden>点大小 <input id="point-size" type="range" min="1" max="5" step="0.5" value="2"><select id="point-density" aria-label="点云预览密度"><option value="full">全量点云</option><option value="sample">1/16 抽样</option></select></label></div>
         <div id="view-hint" class="view-hint"></div>
       </div>
-      <section id="novel-panel" hidden aria-label="候选相机选择"><strong>候选相机 · 全局四邻域</strong><p id="novel-status"></p><div class="novel-actions"><select id="novel-picker" aria-label="候选相机"></select><button id="novel-render">渲染此相机</button><button id="novel-highlight">移动到此相机</button></div><p>黄色：本轮推荐；蓝色：已选；绿色：四邻域。点击空间中的编号会现场渲染高斯，不使用点云颜色预览；点击不改变已选集合。</p><p class="novel-privacy">进入下一步会确认推荐相机，六面逐面补洞：每次只向火山方舟 Seedream 发送一张 1024×1024 待补图，不发送参考图。只补图，暂不回写高斯。</p></section>
+      <section id="novel-panel" hidden aria-label="候选相机选择"><strong>候选相机 · 全局四邻域</strong><p id="novel-status"></p><div class="novel-actions"><select id="novel-picker" aria-label="候选相机"></select><button id="novel-render">渲染此相机</button><button id="novel-highlight">移动到此相机</button></div><p>黄色：本轮推荐；蓝色：已选；绿色：四邻域。点击空间中的编号会现场渲染高斯，不使用点云颜色预览；点击不改变已选集合。</p><p class="novel-privacy">进入下一步会确认推荐相机，六面最多 3 个请求并行补洞：每次只向火山方舟 Seedream 发送一张 1024×1024 待补图，不发送参考图。只补图，暂不回写高斯。</p></section>
       <section id="repair-panel" hidden aria-label="六面补洞与全景融合"></section>
       <section id="normal-control" aria-label="点云法向夹角筛选" hidden>
         <div class="mask-heading point-mask-heading"><strong>点云 Mask 对比</strong><div class="mask-switch" role="group" aria-label="点云 Mask 结果切换"><button id="point-mask-before" aria-pressed="false">Mask 前 · 原始</button><button id="point-mask-after" aria-pressed="true">Mask 后 · 已筛选</button></div></div>

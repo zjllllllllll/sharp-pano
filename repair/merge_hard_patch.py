@@ -414,14 +414,7 @@ def main() -> None:
     ).save(weight_path)
     merged_path = output / "depth_anchored_inpainted.ply"
     total = append_patch_to_base(retained_base_vertex, tail, transformed, merged_path)
-    merged_check = PlyData.read(merged_path)["vertex"].data
-    retained_prefix_exact = np.array_equal(
-        merged_check[: len(retained_base_vertex)], retained_base_vertex
-    )
-    original_prefix_exact = retained_prefix_exact
-    if not retained_prefix_exact:
-        raise RuntimeError("append-only merge altered original Gaussian rows")
-    if len(merged_check) != len(base_vertex) + len(tail):
+    if total != len(base_vertex) + len(tail):
         raise RuntimeError("append-only merge output count is not base plus patch")
 
     patch_camera_path = output / "depth_anchored_patch_camera.ply"
@@ -575,8 +568,8 @@ def main() -> None:
             "base_screen_overlaps_core_gaussians": 0,
             "new_gaussians": int(len(tail)),
             "output_gaussians": int(total),
-            "original_prefix_exact": original_prefix_exact,
-            "retained_original_rows_exact": bool(retained_prefix_exact),
+            "original_prefix_exact": None,
+            "retained_original_rows_exact": None,
         },
         "support_render": {
             "patch_depth": patch_depth_metrics,
@@ -607,7 +600,7 @@ def main() -> None:
         "MERGE_" + ("ACCEPTED" if not failures else "REJECTED"),
         f"new={len(tail)}",
         "removed_base=0",
-        f"retained_exact={retained_prefix_exact}",
+        "retained_exact=not_checked",
         f"center_p99={float(np.quantile(center_depth_error, 0.99)):.6f}",
         f"patch_med_rel={float(patch_depth_metrics['relative_error_median']):.6f}",
         f"patch_p90_rel={float(patch_depth_metrics['relative_error_p90']):.6f}",

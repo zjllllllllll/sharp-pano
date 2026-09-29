@@ -14,7 +14,7 @@
 满足任意一项即停止：
 
 - 剩余视角的最大占比 ≤5%。
-- 最大占比 ≤7%，且标准差 ≤1.5 个百分点。
+- 最大占比 ≤7%，且标准差 ≤1 个百分点。
 - 已完成 5 轮修补（首次建模不计入轮数）。
 
 候选耗尽时单独记录为“没有剩余候选”，不宣称面积达标。评估位于下一轮选相机、截图和付费修补之前；报告与逐相机像素占比保存在主任务的 `iteration-evaluations/`，服务与页面共同使用该停止状态。
@@ -82,7 +82,7 @@ powershell -ExecutionPolicy Bypass -File scripts/install.ps1
 .\run_python.cmd pano-web/server.py --port 8765
 ```
 
-访问 `http://127.0.0.1:8765`，上传 2:1 全景图。服务器仅绑定本机。
+访问 `http://127.0.0.1:8765`，上传 2:1 全景图。网页默认使用自动模式：上传后串行完成初始生成和迭代修补，沿用现有质量重试与停止规则（最多 5 轮），运行期间请保持网页打开。六面图片修补最多 3 个请求并行，结果按原面顺序融合。默认界面只显示主 Viewer，隐藏深度步骤及每轮修补的前三步；这些步骤仍照常执行。右上角可切换到调试模式，保留全部步骤、手动下一步、参数对比和日志。已有手动任务不会因打开默认模式而自动续跑。服务器仅绑定本机。
 
 ```powershell
 .\run_cuda_python.cmd scripts/check_install.py --gpu --report .runtime/installation-check.json
@@ -106,7 +106,7 @@ node --test pano-web/test_camera_filter.mjs pano-web/test_point_filter.mjs pano-
 - `.envs/runtime/`、`models/`、`.cache/torch_extensions/`：本地安装产物，Git 忽略。
 - `pano-web/runs/`：任务输入、输出与日志，Git 忽略。
 
-当前生产路径使用 `third_party/` 和 `models/`。UniSHARP 与四套历史深度 benchmark 已移除；根目录可能保留的旧模型检出、私人测试图和运行产物均被 Git 忽略，不参与安装。`dependency-audit/` 和部分实验文档保留历史设计记录，运行命令以本页为准。
+当前生产路径使用 `third_party/` 和 `models/`。UniSHARP 与四套历史深度 benchmark 已移除；根目录可能保留的旧模型检出、私人测试图和运行产物均被 Git 忽略，不参与安装。过程记录 `records/`、`process-records/`、`dependency-audit/`、`research.md` 及运行日志、缓存、临时目录均由 Git 忽略，本地文件保留。被实验脚本引用的设计文件仍随源码保留，运行命令以本页为准。
 
 算法细节见 [pano-web/README.md](pano-web/README.md)、[NOVEL_VIEWS.md](pano-web/NOVEL_VIEWS.md) 和 [FACE_QUALITY.md](pano-web/FACE_QUALITY.md)；旧文档内的外部路径属于迁移前记录，运行命令以本页为准。
 

@@ -57,7 +57,7 @@ def verify(job):
         independently_copied_assets=len(branch['copied_files']),candidate_pool_identical=True,
         candidate_count=len(cameras),selected_global_max=expected['id'],
         geometry_mask_fraction=expected['mask_stats']['mask_fraction'],
-        alpha_union_mask_fraction=current['preview']['mask_fraction'],
+        repair_mask_fraction=current['preview']['mask_fraction'],
         capture_verified=True,completed_stages=list(state['stages']))
 
 if __name__=='__main__':

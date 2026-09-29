@@ -44,6 +44,13 @@ class ApiTests(unittest.TestCase):
         Image.new('RGB',size,(120,60,20)).save(raw,format='PNG')
         return raw.getvalue()
 
+    def test_mode_assets_are_served(self):
+        for path,mime in [('/workflow-mode.mjs','text/javascript'),('/mode.css','text/css')]:
+            with urllib.request.urlopen(self.url+path) as response:
+                self.assertEqual(response.status,200)
+                self.assertIn(mime,response.headers['Content-Type'])
+                self.assertGreater(len(response.read()),0)
+
     def test_upload_validation_and_token(self):
         self.assertEqual(self.request('/api/upload',self.image((512,256)))[0],403)
         headers={'X-Local-Token':server.TOKEN,'Content-Type':'image/png'}
@@ -54,6 +61,29 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(list(job['stages']),['1'])
         self.assertEqual(self.request('/api/jobs/'+job['id'])[1]['id'],job['id'])
         self.assertEqual(self.request('/api/jobs/'+job['id']+'/debug/1')[0],200)
+
+    def test_workflow_mode_and_stale_next_do_not_run_another_stage(self):
+        headers={'X-Local-Token':server.TOKEN, 'X-Workflow-Mode':'auto'}
+        _,job=self.request('/api/upload',self.image((512,256)),headers)
+        self.assertEqual(job['execution_mode'],'auto')
+        folder=server.job_path(job['id']);endpoint='/api/jobs/'+job['id']+'/next'
+        with patch('server.run_stage') as worker:
+            code,state=self.request(endpoint,b'{"expected_stage":2}',headers)
+            self.assertEqual(code,202)
+            worker.assert_called_once_with(folder,2)
+        # Simulate completion before a second tab submits its stale request.
+        server.GPU.release()
+        state.update(busy=False,running_stage=None)
+        state['stages']['2']={'kind':'fixture'}
+        server.write_job(folder,state)
+        with patch('server.run_stage') as worker:
+            code,repeated=self.request(endpoint,b'{"expected_stage":2}',headers)
+            self.assertEqual(code,200)
+            worker.assert_not_called()
+        self.assertEqual(list(repeated['stages']),['1','2'])
+        self.assertFalse(server.GPU.locked())
+        _,manual=self.request('/api/upload',self.image((512,256)),{'X-Local-Token':server.TOKEN})
+        self.assertEqual(manual['execution_mode'],'debug')
 
     def test_novel_routes_fail_closed_and_keep_gpu_lock_healthy(self):
         headers={'X-Local-Token':server.TOKEN}

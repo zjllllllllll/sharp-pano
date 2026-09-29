@@ -44,7 +44,7 @@ def verify(job):
     recommended,frontier=next_camera(info['cameras'],selected,manifest.get('selection_policy','four-neighbor'))
     return dict(passed=True,camera=result['camera_id'],count=len(info['cameras']),source=manifest['source'],
         source_ply_unchanged=True,validated_mask_identical=not bool(preview.get('capture_version')),
-        alpha_union_verified=bool(preview.get('capture_version')),final_outside_protected_changed_pixels=0,
+        geometry_mask_verified=bool(preview.get('capture_version')),final_outside_protected_changed_pixels=0,
         changed_inside_mask_pixels=int(np.any(original!=final,axis=-1)[mask].sum()),faces=faces,
         selected_ids=selected,next_frontier=frontier,next_recommended_after_future_gaussian_update=recommended,
         seconds=result.get('seconds'),no_gaussian_update=True)

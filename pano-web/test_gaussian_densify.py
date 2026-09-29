@@ -89,7 +89,8 @@ class DenseTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             writer=gd.ComparisonWriter(Path(root),5)
             writer.append(vertices,source,keep,children,stats)
-            views,_=writer.finish()
+            with patch.object(PlyData,'read',side_effect=AssertionError('Export must not read back PLY')):
+                views,_=writer.finish()
             arrays={k:PlyData.read(Path(root)/v['preview'],mmap=False)['vertex'].data for k,v in views.items()}
             np.testing.assert_array_equal(arrays['baseline'],before)
             np.testing.assert_array_equal(arrays['common'],before[keep[source]])

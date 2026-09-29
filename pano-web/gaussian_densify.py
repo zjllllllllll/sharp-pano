@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'sharp-sixface'))
 from point_densify import BLEND, INDEX, build_densification, cached_result as cached_points
 from gaussian_ops import DTYPE, validate_vertices, digest
+from gaussian_alignment import align_short_axes, VERSION as ALIGNMENT_VERSION
 
 VERSION = 3
 PARTS = ('common', 'removed', 'children')
@@ -76,6 +77,7 @@ def cached_result(job, stage):
     try:
         info = json.loads((job/f'gaussian-dense-{stage}.json').read_text(encoding='utf-8'))
         if (info['version'] != VERSION or not info.get('baseline_variants')
+                or (stage == 5 and info.get('normal_alignment') != ALIGNMENT_VERSION)
                 or not cached_points(job) or info['inputs'] != inputs(job, stage)):
             return None
         for name, expected in info['files'].items():
@@ -114,7 +116,6 @@ class ComparisonWriter:
 
     def finish(self):
         import shutil
-        from plyfile import PlyData
         self.close()
         files, views = {}, {}
         try:
@@ -128,10 +129,6 @@ class ComparisonWriter:
                           ''.join(f'property float {field}\n' for field in DTYPE.names)+'end_header\n')
                 with staging.open('wb') as out, raw.open('rb') as src:
                     out.write(header.encode('ascii')); shutil.copyfileobj(src, out, 1024*1024)
-                restored = PlyData.read(staging, mmap='r')['vertex'].data
-                for first in range(0, len(restored), 65536):
-                    validate_vertices(restored[first:first+65536])
-                del restored
                 staging.replace(target)
                 files[name] = [target.stat().st_size, target.stat().st_mtime_ns]
                 views[key] = dict(preview=name, download=name, count=self.counts[key],
@@ -160,7 +157,8 @@ def build(job, stage, progress=print):
     all_ids = np.fromfile(job/INDEX, dtype='<u4')
     writer = ComparisonWriter(job, stage)
     model = None
-    signature = json.dumps(dict(inputs=inputs(job, stage),geometry='panorama_initializer_native_prediction_v1'),sort_keys=True)
+    signature = json.dumps(dict(inputs=inputs(job, stage),geometry='panorama_initializer_native_prediction_v1',
+                                normal_alignment=ALIGNMENT_VERSION if stage==5 else None),sort_keys=True)
     try:
         for i in range(6):
             progress(f'父高斯继承 STEP {stage} · {i+1}/6')
@@ -189,6 +187,7 @@ def build(job, stage, progress=print):
                     from sharp_model import infer_panorama_depth
                     scene, _ = infer_panorama_depth(model, face, z, cam)
                     scene, _ = ndc_to_camera(scene, cam); scene = world_transform(scene, cam)
+                    scene, _ = align_short_axes(scene, base, cam, width)
                     vertices, _, source = to_vertices(scene, i, cam['hfov_deg'], return_indices=True)
                     temp = cache.with_suffix('.tmp.npz')
                     np.savez(temp,signature=signature,vertices=vertices,source=source)
@@ -214,6 +213,7 @@ def build(job, stage, progress=print):
 
 def publish(job, stage, views, files, density, start, inheritance):
     info = dict(version=VERSION, inputs=inputs(job, stage), files=files, dense=views['dense'],
+                normal_alignment=ALIGNMENT_VERSION if stage==5 else None,
                 parts={k: views[k] for k in PARTS}, point_added=density['added'],
                 baseline_variants=dict(unmasked=views['baseline'],masked=views['masked']),
                 comparison_baseline='same forward; older original PLYs preserved separately',

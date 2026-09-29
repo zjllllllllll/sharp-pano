@@ -185,6 +185,7 @@ def cloud_stage(job):
 def gaussian_stage(job, adjusted):
     from geometry import camera, split_face
     from gaussian_ops import ndc_to_camera, world_transform, to_vertices
+    from gaussian_alignment import align_short_axes
     from point_mask import build_mask, load_face
     from gaussian_variants import save_variants
     progress('准备固定点云 Mask：82° / 64 邻居 / 15 cm')
@@ -220,11 +221,13 @@ def gaussian_stage(job, adjusted):
             scene, _ = ndc_to_camera(scene, cam)
             scene = world_transform(scene, cam)
             with np.load(job / 'base' / f'{i}.npz') as base:
+                progress(f'对齐可信局部法向 {i+1}/6：{cam["face"]} · 仅旋转高斯短轴')
+                scene, alignment = align_short_axes(scene, base, cam, width)
                 sample = slice(None,None,32)
                 movement = np.linalg.norm(scene['means'][sample]-base['means'][sample],axis=1)
                 # Eigenvalue ordering can change when the covariance is rotated.
                 scale_ratio = np.sort(scene['scales'][sample],axis=1)/np.sort(base['scales'][sample],axis=1)
-                changes.append(dict(face=cam['face'], position_change_m_p50_p90_p99=
+                changes.append(dict(face=cam['face'], normal_alignment=alignment, position_change_m_p50_p90_p99=
                     np.quantile(movement,[.5,.9,.99]).tolist(),
                     principal_scale_ratio_p10_p50_p90=np.quantile(scale_ratio,[.1,.5,.9]).tolist(),
                     opacity_change_abs_mean=float(np.abs(scene['alpha'][sample]-base['alpha'][sample]).mean())))
@@ -250,7 +253,7 @@ def gaussian_stage(job, adjusted):
     del parts
     filename = 'adjusted.ply' if adjusted else 'initialized.ply'
     keep = np.concatenate(mask_parts)
-    progress('写入未筛选与 Mask 后双层高斯 PLY，并逐项回读验证')
+    progress('写入未筛选与 Mask 后双层高斯 PLY')
     variants, applied = save_variants(job, filename, vertices, keep, mask_info)
     views, files = writer.finish()
     dense_info = publish(job, 5 if adjusted else 4, views, files, density, density_start, writer.inheritance)
@@ -262,7 +265,7 @@ def gaussian_stage(job, adjusted):
                              'face_resolution':1536, 'face_fov_degrees':100, 'precision':'float32',
                              'changes_from_raw_initializer':changes,
                              'stat_sampling':'every 32nd Gaussian before edge feather; both layers; includes composer activation'},
-                description=('统一全景深度初始化双层高斯；保留 SHARP 最终预测的位置、尺度、旋转、颜色和透明度，跳过学习深度对齐，不做最终深度回投。' if adjusted else
+                description=('统一全景深度初始化双层高斯；保留 SHARP 最终预测的位置、尺度、颜色和透明度，仅将高斯短轴对齐可信局部表面法向，跳过学习深度对齐，不做最终深度回投。' if adjusted else
                              '导出点云阶段缓存的初始化中心、尺度、旋转、颜色与透明度，尚未加上网络预测修正。') +
                 ' 六面 100°，已统一坐标并作边缘透明度融合；默认显示 Mask 后结果，可切换原始结果。')
 

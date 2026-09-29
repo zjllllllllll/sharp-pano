@@ -1,6 +1,5 @@
 """Generate SHARP Gaussians with an exact first-surface camera-Z anchor.
 
-When an ERP is supplied, final learned rays sample that shared surface directly.
 The learned Alignment UNet is bypassed.  Completed camera-Z supplies the first
 depth channel directly; SHARP's monocular relative gap supplies a conservative
 second channel to keep the five-channel decoder contract.  SHARP still predicts
@@ -58,8 +57,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--camera-json", type=Path, required=True)
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--panorama-depth", type=Path)
-    parser.add_argument("--panorama-support", type=Path)
     parser.add_argument("--render-scale", type=float, default=0.5)
     parser.add_argument("--alpha-min", type=float, default=0.20)
     parser.add_argument(
@@ -293,7 +290,6 @@ def hard_predict(
     surface_normal_min_ratio: float,
     surface_normal_max_ratio: float,
     surface_max_stretch: float,
-    *, panorama_depth=None, camera_rotation=None, panorama_support=None,
 ) -> tuple[Gaussians3D, np.ndarray, dict[str, object], float]:
     internal = (1536, 1536)
     height, width = image.shape[:2]
@@ -416,23 +412,6 @@ def hard_predict(
         surface_camera = (
             surface_ndc @ unprojection[:, :3].T + unprojection[:, 3]
         )
-        if panorama_depth is not None:
-            # The learned x/y offsets change the ray. Reusing target_grid at
-            # the original pixel would assign another ray's depth to this one.
-            from panorama_anchor import anchor_points
-            camera_points = gaussians.mean_vectors[0, :grid_h*grid_w].cpu().numpy()
-            anchored, ratios = anchor_points(camera_points, panorama_depth,
-                                             rotation=camera_rotation, support=panorama_support)
-            anchored_tensor = torch.as_tensor(anchored, device=device)
-            ratios_tensor = torch.as_tensor(ratios, device=device)
-            camera_means = gaussians.mean_vectors.clone()
-            camera_scales = gaussians.singular_values.clone()
-            camera_means[0, :grid_h*grid_w] = anchored_tensor
-            camera_scales[0, :grid_h*grid_w] *= ratios_tensor[:, None]
-            gaussians = Gaussians3D(camera_means, camera_scales, gaussians.quaternions,
-                                   gaussians.colors, gaussians.opacities)
-            target_grid = anchored_tensor[:, 2].reshape(1, grid_h, grid_w)
-            surface_camera = anchored_tensor.reshape(1, grid_h, grid_w, 3)
         surface_diagnostics: dict[str, object] = {
             "mode": covariance_mode,
             "applied": False,
@@ -484,8 +463,7 @@ def hard_predict(
         "layer0_center_absolute_error_p99": float(np.quantile(error, 0.99)),
         "layer0_center_absolute_error_max": float(error.max()),
         "disabled_unsupervised_layers": max(layers - 1, 0),
-        "center_update": ("shared_panorama_at_final_ray" if panorama_depth is not None
-                          else "preserve_learned_ray_then_set_exact_camera_z"),
+        "center_update": "preserve_learned_ray_then_set_exact_camera_z",
         "depth_ratio": tensor_quantiles(depth_ratio),
         "learned_ray_offset_magnitude": tensor_quantiles(base_ray_offset),
         "preserved_ray_error_max": float(preserved_ray_error.max()),
@@ -536,9 +514,6 @@ def main() -> None:
         args.surface_normal_min_ratio,
         args.surface_normal_max_ratio,
         args.surface_max_stretch,
-        panorama_depth=np.load(args.panorama_depth) if args.panorama_depth else None,
-        camera_rotation=np.asarray(camera.get("c2w", np.eye(4)))[:3, :3],
-        panorama_support=(np.asarray(Image.open(args.panorama_support)) > 0) if args.panorama_support else None,
     )
     ply_path = output / "sharp_hard_layer0_camera.ply"
     save_ply(gaussians, focal, (height, width), ply_path)
@@ -569,10 +544,9 @@ def main() -> None:
     report = {
         "status": "diagnostic_only",
         "quality_gate_enabled": False,
-        "contract": "sharp_hard_panorama_surface_v3" if args.panorama_depth else "sharp_hard_camera_z_surface_covariance_v2",
+        "contract": "sharp_hard_camera_z_surface_covariance_v2",
         "alignment_unet": "bypassed",
         "first_layer_geometry": (
-            "shared_panorama_at_final_ray_with_surface_covariance" if args.panorama_depth else
             "preserved_learned_ray_exact_camera_z_with_surface_jacobian_covariance"
         ),
         "second_layer": "opacity_disabled_no_depth_supervision",

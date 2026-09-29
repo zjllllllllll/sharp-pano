@@ -116,7 +116,7 @@ def evaluate_iteration(path,stage):
         state=read_job(path);state['iteration_policy']=ITERATION_POLICY;state['iteration_evaluation']=report
         state['iteration_status']='stopped' if report['stop'] else 'ready'
         reasons=dict(max_rounds='达到最多 5 轮',no_remaining_candidates='没有剩余候选相机',
-            strict_max='最大几何 Mask 像素占比 ≤5%',relaxed_max_and_std='最大几何 Mask 像素占比 ≤7%，且标准差 ≤1.5 个百分点',
+            strict_max='最大几何 Mask 像素占比 ≤5%',relaxed_max_and_std='最大几何 Mask 像素占比 ≤7%，且标准差 ≤1 个百分点',
             continue_='尚未满足停止条件')
         reason=reasons.get(report['reason'],reasons['continue_']);stats=report['statistics']
         state['message']=f'第 {report["after_round"]} 轮完成；'+('迭代已停止：' if report['stop'] else '')+reason
@@ -449,7 +449,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self.file(job_path(jid)/name, url.query == 'download=1')
             if path == '/':
                 return self.file(APP/'static/index.html')
-            if path in ('/app.js','/point-filter.mjs','/view-cache.mjs','/novel-view.js','/novel.css','/style.css','/debug.css','/favicon.svg'):
+            if path in ('/app.js','/workflow-mode.mjs','/mode.css','/point-filter.mjs','/view-cache.mjs','/novel-view.js','/novel.css','/style.css','/debug.css','/favicon.svg'):
                 return self.file(APP/'static'/path[1:])
             if path.startswith('/vendor/'):
                 relative = path.removeprefix('/vendor/')
@@ -619,6 +619,7 @@ class Handler(BaseHTTPRequestHandler):
                 state = dict(id=jid, created=time.time(), busy=False, running_stage=None, error=None,
                              rgb_repair_model='gpt-image-2', image_provider=selected_provider(),
                              camera_selection_policy='max-mask',
+                             execution_mode='auto' if self.headers.get('X-Workflow-Mode')=='auto' else 'debug',
                              message='全景图已上传', stages={'1':dict(kind='image', image='input.png',
                              download='input.png', width=w, height=h, description='原始 2:1 全景图。前六步本地计算；第七步补洞调用所配置的图片服务。')})
                 write_job(job, state)
@@ -640,6 +641,10 @@ class Handler(BaseHTTPRequestHandler):
                         if state.get('quality_run',{}).get('status') in ('awaiting_capture','exhausted','cancelled'):
                             raise ValueError('本轮质量尝试等待采集或已结束，请查看质量尝试状态')
                         stage = len(state['stages'])+1
+                        # A second automatic tab must not advance a later stage on a stale request.
+                        if 'expected_stage' in options and options['expected_stage'] != stage:
+                            GPU.release()
+                            return self.json(state)
                         if state.get('iteration_status')=='stopped':raise ValueError('迭代已按停止规则结束')
                         if stage > 5+4*MAX_ROUNDS:raise ValueError('已达到最多 5 轮修补')
                         local_stage=6+(stage-6)%4 if stage>=6 else stage

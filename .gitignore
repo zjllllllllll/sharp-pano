@@ -55,3 +55,16 @@ secrets/
 /room-outline-experiment/development/
 /room-outline-experiment/edge-fix-checks/
 /scripts/vendor_local_dependencies.py
+
+# Local process records and temporary tooling outputs
+/records/
+/process-records/
+/dependency-audit/
+/research.md
+**/.mypy_cache/
+**/.ruff_cache/
+**/.coverage
+**/htmlcov/
+**/diagnostics/
+**/tmp/
+**/temp/

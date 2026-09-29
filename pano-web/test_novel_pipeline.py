@@ -68,38 +68,41 @@ class NovelPipelineTests(unittest.TestCase):
         self.assertEqual(n.public_state(self.job)['selected_ids'],['C000'])
         self.assertEqual(n.public_state(self.job)['highlighted'],'C002')
 
-    def test_true_black_is_preserved_and_transparency_adds_green_mask(self):
+    def test_transparency_never_expands_panorama_or_face_masks(self):
+        baseline=n.capture(self.job,'C001',self.payload)
+        baseline_dir=self.folder/baseline['path']
         data=io.BytesIO();Image.fromarray(np.zeros((512,512,3),np.uint8)).save(data,format='PNG')
         black='data:image/png;base64,'+base64.b64encode(data.getvalue()).decode()
-        alpha=np.full((512,512),255,np.uint8);alpha[100:180,100:180]=0;alpha[320:380,300:360]=178
-        alpha[15,300]=0
+        alpha=np.zeros((512,512),np.uint8)
         data=io.BytesIO();Image.fromarray(alpha).save(data,format='PNG')
-        alpha_uri='data:image/png;base64,'+base64.b64encode(data.getvalue()).decode()
-        payload={**self.payload,'faces':[black]*6,'alpha_faces':[alpha_uri]+self.payload['alpha_faces'][1:]}
+        transparent='data:image/png;base64,'+base64.b64encode(data.getvalue()).decode()
+        payload={**self.payload,'faces':[black]*6,'alpha_faces':[transparent]*6}
         result=n.capture(self.job,'C001',payload);capture=self.folder/result['path']
         final_mask=np.asarray(Image.open(capture/'mask.png'))>0
-        added=np.asarray(Image.open(capture/'alpha-mask.png'))>0
         geometry=np.asarray(Image.open(capture/'geometry-mask.png'))>0
-        np.testing.assert_array_equal(final_mask,geometry|added)
-        self.assertGreater(result['alpha_added_pixels'],0)
+        np.testing.assert_array_equal(final_mask,geometry)
+        np.testing.assert_array_equal(final_mask,np.asarray(Image.open(baseline_dir/'mask.png'))>0)
+        for face in n.FACE_NAMES:
+            np.testing.assert_array_equal(np.asarray(Image.open(capture/f'{face}-mask.png')),
+                np.asarray(Image.open(baseline_dir/f'{face}-mask.png')))
         masked=np.asarray(Image.open(capture/'masked.png'))
         self.assertTrue(np.all(masked[final_mask]==n.MASK_COLOR))
         self.assertTrue(np.all(masked[~final_mask]==0))
-        face_mask=np.asarray(Image.open(capture/'front-mask.png'))>0
-        self.assertTrue(face_mask[102:178,102:178].all())
-        self.assertTrue(face_mask[322:378,302:358].all())
-        self.assertFalse(face_mask[15,300])
-        self.assertEqual(result['alpha_threshold'],.70)
-        self.assertEqual(result['mask_cleanup']['min_component_pixels'],16)
+        self.assertFalse((capture/'alpha-mask.png').exists())
+        self.assertFalse((capture/'alpha-mask-raw.png').exists())
+        self.assertNotIn('alpha_threshold',result)
+        self.assertNotIn('alpha_added_pixels',result)
+        # Existing quality evaluation still gets the true render alpha.
         np.testing.assert_array_equal(np.asarray(Image.open(capture/'front-render-alpha.png')),alpha)
 
-    def test_old_capture_without_alpha_is_rejected(self):
+    def test_capture_without_quality_alpha_is_rejected(self):
         payload={**self.payload};payload.pop('alpha_faces')
         with self.assertRaises(ValueError):n.capture(self.job,'C001',payload)
 
     def test_bad_capture_and_artifact_paths_rejected(self):
         for cid,payload in [('C999',self.payload),('C001',{**self.payload,'revision':'b'*16}),
-                            ('C001',{**self.payload,'faces':['not-png']*6})]:
+                            ('C001',{**self.payload,'faces':['not-png']*6}),
+                            ('C001',{**self.payload,'capture_version':'unknown-plus-alpha070-open3-smooth1-green-v3'})]:
             with self.assertRaises(ValueError):n.capture(self.job,cid,payload)
         for path in [f'{self.rev}/pipeline.json',f'{self.rev}/selection.json','../job.json',f'{self.rev}/../../job.json']:
             with self.assertRaises(FileNotFoundError):n.artifact(self.job,path)

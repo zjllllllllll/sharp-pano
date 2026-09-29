@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from novel_geometry import next_camera,six_faces,merge_faces,composite_inside_mask,erp_directions,outward_blend_weights,composite_outward,merge_alpha_holes,clean_mask,smooth_mask,ALPHA_THRESHOLD_U8
+from novel_geometry import next_camera,six_faces,merge_faces,composite_inside_mask,erp_directions,outward_blend_weights,composite_outward,clean_mask,smooth_mask,repair_masks,repair_faces
 
 
 def point(i,x,z,m):return dict(id=f'C{i:03d}',grid=[x,z],mask_stats=dict(mask_fraction=m))
@@ -15,19 +15,23 @@ class NovelGeometryTests(unittest.TestCase):
         self.assertEqual(next_camera(pool,[c['id'] for c in pool],'max-mask'),(None,[]))
         with self.assertRaises(ValueError):next_camera(pool,[],'unknown')
 
-    def test_alpha_mask_uses_opacity_not_rgb_or_averaged_overlap(self):
-        alphas=[np.full((128,128),255,np.uint8) for _ in range(6)]
-        self.assertFalse(merge_alpha_holes(alphas,256,128).any())
-        self.assertEqual(ALPHA_THRESHOLD_U8,179)
-        alphas[0][50:80,60:90]=179
-        self.assertFalse(merge_alpha_holes(alphas,256,128).any())
-        alphas[0][50:80,60:90]=178
-        holes=merge_alpha_holes(alphas,256,128)
-        self.assertTrue(holes.any());self.assertFalse(holes.all())
-        alphas[0][:]=0
-        wider=merge_alpha_holes(alphas,256,128)
-        self.assertTrue(wider[holes].all())
-        self.assertTrue(merge_alpha_holes([np.zeros_like(a) for a in alphas],256,128).all())
+    def test_repair_masks_use_only_cleaned_geometry(self):
+        raw=np.zeros((64,128),bool);raw[12:44,26:62]=True
+        raw[3,3]=True
+        masks=repair_masks(raw)
+        np.testing.assert_array_equal(masks['combined'],clean_mask(raw,periodic=True))
+        np.testing.assert_array_equal(masks['geometry'],masks['combined'])
+        self.assertFalse(masks['combined'][3,3])
+        self.assertEqual(set(masks),{'geometry','combined'})
+
+    def test_face_masks_do_not_add_transparent_or_black_holes(self):
+        panorama=np.zeros((64,128,3),np.uint8)
+        self.assertTrue(all(not face['mask'].any() for face in repair_faces(panorama,np.zeros((64,128),bool))))
+        mask=np.zeros((64,128),bool);mask[20:44,55:73]=True
+        actual=repair_faces(panorama,mask)
+        projected=six_faces(panorama,mask)
+        for face,expected in zip(actual,projected,strict=True):
+            np.testing.assert_array_equal(face['mask'],clean_mask(expected['mask']))
 
     def test_cleanup_removes_specks_and_thin_lines_but_keeps_real_holes(self):
         m=np.zeros((32,64),bool);m[4:14,4:14]=True;m[20:23,20:23]=True;m[20:24,40:44]=True;m[28,5:30]=True

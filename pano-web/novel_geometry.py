@@ -17,9 +17,7 @@ FACE_SIZE=512
 PANO_WIDTH,PANO_HEIGHT=1024,512
 FACE_NAMES=('front','right','back','left','up','down')
 MASK_COLOR=(0,255,0)
-CAPTURE_VERSION='unknown-plus-alpha070-open3-smooth1-green-v3'
-ALPHA_THRESHOLD=.70
-ALPHA_THRESHOLD_U8=int(np.ceil(255*ALPHA_THRESHOLD))
+CAPTURE_VERSION='geometry-only-open3-smooth1-green-v4'
 MASK_SMOOTHING=dict(method='gaussian_then_threshold',sigma_pixels=1.,radius_pixels=3,threshold=.5)
 MASK_CLEANUP=dict(version='open3-area16-gauss1-v2',kernel_size=3,iterations=1,min_component_pixels=16,connectivity=8,
     smoothing=MASK_SMOOTHING)
@@ -74,44 +72,17 @@ def clean_mask(mask,periodic=False,*,smoothing=True):
     return smooth_mask(cleaned,periodic) if smoothing else cleaned
 
 
-def repair_masks(geometry,alphas):
-    raw_alpha=merge_alpha_holes(alphas)
-    g=clean_mask(geometry,periodic=True);a=clean_mask(raw_alpha,periodic=True)
-    combined=clean_mask(g|a,periodic=True)
-    # Pixels filled only by smoothing the union have contributions from both
-    # masks. Preserve this provenance so the color layers exactly cover Mask.
-    shared=combined&~(g|a)
-    return dict(geometry=(g|shared)&combined,alpha=(a|shared)&combined,combined=combined,
-        raw_alpha=raw_alpha,shared_smoothing_pixels=int(shared.sum()))
+def repair_masks(geometry):
+    """The repair domain is the cleaned geometric unknown-space mask."""
+    mask=clean_mask(geometry,periodic=True)
+    return dict(geometry=mask,combined=mask.copy())
 
 
-def repair_faces(panorama,mask,alphas):
+def repair_faces(panorama,mask):
     faces=six_faces(panorama,mask)
-    for i,face in enumerate(faces):
-        # Clean AFTER native alpha union: small holes must not be reintroduced.
-        face['mask']=clean_mask(face['mask']|(alphas[i]<ALPHA_THRESHOLD_U8))
+    for face in faces:
+        face['mask']=clean_mask(face['mask'])
     return faces
-
-
-def merge_alpha_holes(alphas,width=PANO_WIDTH,height=PANO_HEIGHT):
-    """Union alpha < ALPHA_THRESHOLD from every contributing calibrated face.
-
-    Threshold before projection: averaging/rounding alpha would hide small
-    transparent holes or let an opaque overlapping face erase them.
-    """
-    if len(alphas)!=6:raise ValueError('Exactly six alpha images required')
-    directions=erp_directions(width,height);holes=np.zeros((height,width),bool)
-    for index,alpha in enumerate(alphas):
-        alpha=np.asarray(alpha)
-        if alpha.dtype!=np.uint8 or alpha.ndim!=2 or alpha.shape[0]!=alpha.shape[1]:
-            raise ValueError('Expected square uint8 render alpha')
-        size=alpha.shape[0];cam=camera(index,size=size,fov=FOV)
-        local=directions@np.asarray(cam['c2w'])[:3,:3];focal=cam['K_pixel_edge'][0][0]
-        x=local[...,0]/np.maximum(local[...,2],1e-8)*focal+size/2-.5
-        y=local[...,1]/np.maximum(local[...,2],1e-8)*focal+size/2-.5
-        sampled=map_coordinates((alpha<ALPHA_THRESHOLD_U8).astype(np.float32),[y,x],order=1,mode='nearest',prefilter=False)
-        holes|=(sampled>0)&(angular_weights(directions,index,fov=FOV)>1e-4)
-    return holes
 
 
 def next_camera(candidates, selected_ids, policy='four-neighbor'):

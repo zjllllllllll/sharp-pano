@@ -12,8 +12,9 @@ from novel_pipeline import read,write_json,digest
 class StopTests(unittest.TestCase):
     def test_thresholds_use_unrounded_values_and_population_std(self):
         self.assertEqual(decide([5,0],2)['reason'],'strict_max')
-        self.assertEqual(decide([7,4],2)['reason'],'relaxed_max_and_std')
-        self.assertEqual(decide([7,3.9999],2)['reason'],'continue')
+        self.assertEqual(decide([7,5],2)['reason'],'relaxed_max_and_std')
+        self.assertEqual(decide([7,4.9999],2)['reason'],'continue')
+        self.assertEqual(decide([7,4],2)['reason'],'continue')
         self.assertEqual(decide([7.00001,7],2)['reason'],'continue')
         result=decide([6,6],2)
         self.assertEqual(result['statistics']['std_percentage_points'],0)

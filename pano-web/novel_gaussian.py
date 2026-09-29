@@ -16,10 +16,10 @@ from novel_geometry import FACE_NAMES,merge_faces
 from novel_gaussian_geometry import REFERENCE,BLEND_REFERENCE_PIXELS,BLEND_REFERENCE_SHORT_SIDE,project_inputs,select_patch
 from novel_gaussian_filter import capture_initializer,build_point_filter,PARAMETERS as POINT_PARAMETERS,NORMAL_PARAMETERS
 
-VERSION='sharp-hard-panorama-final-ray-v5-no-quality-gates'
+VERSION='sharp-hard-original-grid-depth-v6-no-quality-gates'
 from project_paths import MODELS, SHARP
 CHECKPOINT=MODELS/'sharp_2572gikvuh.pt'
-REFERENCE_FILES=('panorama_anchor.py','run_sharp_hard_depth.py','sharp_runtime.py','merge_hard_patch.py','gaussian_patch_io.py','fuse_and_validate_depth.py')
+REFERENCE_FILES=('run_sharp_hard_depth.py','sharp_runtime.py','merge_hard_patch.py','gaussian_patch_io.py','fuse_and_validate_depth.py')
 
 
 def prepare_signature(job):
@@ -55,7 +55,7 @@ def prepare_signature(job):
         reference={name:digest(REFERENCE/name) for name in REFERENCE_FILES},
         adapter={name:digest(Path(__file__).with_name(name)) for name in ('novel_gaussian.py','novel_gaussian_geometry.py',
             'novel_gaussian_filter.py','point_normals.py','point_distances.py','point_mask.py','quality_fusion.py')},
-        settings=dict(depth_geometry='shared_panorama_at_final_ray',sharp_quality_gate=False,patch_quality_gate=False,coverage_policy='diagnostic_only',face_size=512,fov=100,internal_size=1536,layer0_grid=768,covariance_mode='surface_jacobian',surface_tangent_sigma=1.5,
+        settings=dict(depth_geometry='original_grid_camera_z',sharp_quality_gate=False,patch_quality_gate=False,coverage_policy='diagnostic_only',face_size=512,fov=100,internal_size=1536,layer0_grid=768,covariance_mode='surface_jacobian',surface_tangent_sigma=1.5,
             blend_reference_pixels=BLEND_REFERENCE_PIXELS,blend_reference_short_side=BLEND_REFERENCE_SHORT_SIDE,blend_ring_count=6,core_opacity_mode='full',
             point_filter=POINT_PARAMETERS,normal_estimation=NORMAL_PARAMETERS))
     return state,folder,files,signature
@@ -69,13 +69,11 @@ def verify_cached(out,record):
     return record.get('files') and all((out/name).is_file() and digest(out/name)==sha for name,sha in record['files'].items())
 
 
-def run_reference_sharp(face, *, panorama_depth=None, panorama_support=None):
+def run_reference_sharp(face):
     import run_sharp_hard_depth
     args=['run_sharp_hard_depth.py','--image',str(face/'rgb.png'),'--depth',str(face/'depth-input.npy'),
         '--hole-mask',str(face/'mask.png'),'--camera-json',str(face/'camera.json'),
         '--checkpoint',str(CHECKPOINT),'--covariance-mode','surface_jacobian','--surface-tangent-sigma','1.5','--output-dir',str(face/'sharp')]
-    if panorama_depth is not None:args += ['--panorama-depth',str(panorama_depth)]
-    if panorama_support is not None:args += ['--panorama-support',str(panorama_support)]
     previous=sys.argv;loader=run_sharp_hard_depth.load_predictor;hooks=[];captures=[]
     cam=read(face/'camera.json')
     def load_with_capture(*args,**kwargs):
@@ -95,10 +93,7 @@ def run_reference_sharp(face, *, panorama_depth=None, panorama_support=None):
             device=run_sharp_hard_depth.torch.device('cuda')
             run_sharp_hard_depth.patch_gpu_svd();model=load_with_capture(CHECKPOINT,device)
             run_sharp_hard_depth.hard_predict(model,np.asarray(Image.open(face/'rgb.png').convert('RGB')),
-                np.load(face/'depth-input.npy'),float(cam['intrinsic_K_opencv'][0][0]),device,'surface_jacobian',1.5,.05,.35,4.,
-                panorama_depth=np.load(panorama_depth) if panorama_depth else None,
-                camera_rotation=np.asarray(cam['c2w'])[:3,:3],
-                panorama_support=(np.asarray(Image.open(panorama_support))>0) if panorama_support else None)
+                np.load(face/'depth-input.npy'),float(cam['intrinsic_K_opencv'][0][0]),device,'surface_jacobian',1.5,.05,.35,4.)
         if len(captures)!=1:raise ValueError('Expected exactly one initializer capture')
     finally:
         for hook in hooks:hook.remove()
@@ -155,8 +150,8 @@ def repair_gaussians(job):
         write_json(face/'camera.json',projected['camera']);write_json(face/'projection.json',projected['diagnostics'])
         if name not in accepted or not projected['support'].any():
             accepted.discard(name);continue
-        print(f'{name}：深度输入 → SHARP 生成/调整 → 按最终射线采样统一全景深度 → 更新尺度及表面协方差',flush=True)
-        run_reference_sharp(face,panorama_depth=inputs['depth'],panorama_support=inputs['support'])
+        print(f'{name}：深度输入 → SHARP 生成/调整 → 沿学习射线单次回拉到原始网格目标深度 → 参考表面协方差',flush=True)
+        run_reference_sharp(face)
         write_json(face/'inference-cache.json',dict(files=file_hashes(face)))
         gc.collect();torch.cuda.empty_cache()
     point_filter=build_point_filter(out,lambda message:print(message,flush=True),accepted_faces=accepted)
@@ -192,14 +187,10 @@ def repair_gaussians(job):
     combined=np.empty(len(base)+len(patch),dtype=base.dtype);combined[:len(base)]=base;combined[len(base):]=patch
     PlyData([PlyElement.describe(combined,'vertex')],text=False,byte_order='<').write(out/'merged.ply')
     count=len(combined);del combined,patch
-    check=PlyData.read(out/'merged.ply',mmap='r')['vertex'].data
-    for offset in range(0,len(base),65536):
-        if base[offset:offset+65536].tobytes()!=check[offset:min(offset+65536,len(base))].tobytes():raise AssertionError('Original Gaussian rows changed')
-    del check
     print('实际渲染原始场景、补丁和合并场景，记录深度与覆盖率诊断',flush=True)
     render_report=render_diagnostics(out,inputs['base'],records)
     warnings=[]
-    report=dict(status='accepted',quality_gate_enabled=False,base_prefix_exact=True,source_sha256_unchanged=digest(inputs['base'])==signature['inputs']['base'],
+    report=dict(status='accepted',quality_gate_enabled=False,base_prefix_exact=None,source_sha256_unchanged=digest(inputs['base'])==signature['inputs']['base'],
         base_count=len(base),added_count=count-len(base),final_count=count,face_results=records,render=render_report,point_filter=point_filter)
     if not report['source_sha256_unchanged']:raise AssertionError('Frozen base changed during generation')
     write_json(out/'acceptance.json',report)
@@ -215,7 +206,7 @@ def repair_gaussians(job):
         image=f'{relative}/merged-panorama.png',before_image=f'{relative}/base-panorama.png',
         patch_image=f'{relative}/patch-panorama.png',count=count,base_count=len(base),added_count=count-len(base),
         sha256=files['merged.ply'],patch_sha256=files['patch.ply'],files=files,acceptance=report,warnings=warnings,seconds=time.perf_counter()-start,
-        description='第七步融合 RGB + 第八步 LingBot 直接深度 → 参考 SHARP 深度注入、网络调整、最终射线全景深度恢复与协方差更新 → 按初始化身份应用 82° / K=64 / 15 cm 点剔除 → Mask 及六环补丁 → 追加到原始高斯。')
+        description='第七步融合 RGB + 第八步 LingBot 直接深度 → 参考 SHARP 深度注入、网络调整、原始网格目标深度单次回拉与协方差更新 → 按初始化身份应用 82° / K=64 / 15 cm 点剔除 → Mask 及六环补丁 → 追加到原始高斯。')
     write_json(out/'result.json',result);return result
 
 

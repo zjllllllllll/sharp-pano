@@ -13,7 +13,7 @@ from novel_geometry import clean_mask,MASK_CLEANUP
 
 MAX_ROUNDS=5
 POLICY=dict(version='geometry-pixel-stop-v1',area='cleaned_geometry_pixels',
-    strict_max_percent=5.0,relaxed_max_percent=7.0,std_percentage_points=1.5,
+    strict_max_percent=5.0,relaxed_max_percent=7.0,std_percentage_points=1.0,
     std_ddof=0,max_rounds=MAX_ROUNDS,scope='remaining_unprocessed_candidates')
 
 

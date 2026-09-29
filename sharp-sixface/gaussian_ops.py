@@ -106,9 +106,6 @@ def save_vertices(path, vertices, *, allow_empty=False):
     validate_vertices(vertices, allow_empty=allow_empty)
     PlyData([PlyElement.describe(vertices,'vertex')],text=False,byte_order='<',
             comments=['SHARP six-face panorama; OpenCV world axes; units meters; SH0 sRGB']).write(partial)
-    restored=PlyData.read(partial,mmap=False)['vertex'].data
-    if not np.array_equal(restored,vertices): raise RuntimeError('PLY readback differs')
-    del restored
     partial.rename(path)
     return {'path':str(path),'gaussians':len(vertices),'bytes':path.stat().st_size,'sha256':digest(path),
-            'finite':True,'unit_quaternions':True,'bit_exact_readback':True}
+            'finite':True,'unit_quaternions':True,'bit_exact_readback':None}

@@ -16,6 +16,50 @@ sys.path.insert(0,str(REFERENCE))
 
 
 class PatchGeometryTests(unittest.TestCase):
+    def test_single_anchor_keeps_original_grid_depth_after_learned_ray_crosses_edge(self):
+        import torch
+        import run_sharp_hard_depth as hard
+        from sharp.utils.gaussians import Gaussians3D
+        # The left cell belongs to the rear surface (3 m), but its learned
+        # lateral offset points towards the right, foreground surface (1 m).
+        target=np.ones((8,8),np.float32);target[:,:4]=3.
+        base_x=torch.tensor([[-.5,.5],[-.5,.5]])[None,None,None].expand(1,1,2,2,2)
+        base_y=torch.tensor([[-.5,-.5],[.5,.5]])[None,None,None].expand(1,1,2,2,2)
+        base=SimpleNamespace(mean_x_ndc=base_x,mean_y_ndc=base_y)
+        init=SimpleNamespace(gaussian_base_values=base,feature_input=None,global_scale=None)
+        means=torch.ones(1,3,2,2,2)*2.
+        scales=torch.ones_like(means)*.1
+        quats=torch.zeros(1,4,2,2,2);quats[:,0]=1.
+        colors=torch.full_like(means,.25);alpha=torch.ones(1,2,2,2)*.8
+        grid=Gaussians3D(means,scales,quats,colors,alpha)
+        predictor=SimpleNamespace(
+            monodepth_model=lambda _:SimpleNamespace(disparity=torch.ones(1,1,2,2),output_features=None),
+            init_model=lambda *args:init,
+            feature_model=lambda *args,**kwargs:None,
+            prediction_head=lambda _:None,
+            gaussian_composer=lambda **kwargs:grid)
+        predictor.init_model.num_layers=2
+        surfaces=[]
+        def covariance(gaussians,surface,*args):
+            surfaces.append(surface.clone());return gaussians,{}
+        with patch.object(hard,'unproject_gaussians',side_effect=lambda g,*args:g), \
+             patch.object(hard,'get_unprojection_matrix',return_value=torch.eye(4)), \
+             patch.object(hard,'surface_jacobian_covariance',side_effect=covariance), \
+             patch.object(hard.torch.cuda,'synchronize'):
+            result,z,diag,_=hard.hard_predict(predictor,np.zeros((8,8,3),np.uint8),target,4.,
+                torch.device('cpu'),'surface_jacobian',1.5,.05,.35,4.)
+        expected=torch.tensor([[3.,1.],[3.,1.]])
+        np.testing.assert_array_equal(z,expected.numpy())
+        # Same learned ray and color; only the original-grid depth controls range.
+        torch.testing.assert_close(result.mean_vectors[0,:4],expected.reshape(-1,1).expand(4,3))
+        torch.testing.assert_close(result.colors,torch.full_like(result.colors,.25))
+        torch.testing.assert_close(result.singular_values[0,:4],expected.reshape(-1,1).expand(4,3)*.05)
+        self.assertTrue(torch.all(result.opacities[0,4:]==0))
+        self.assertEqual(diag['center_update'],'preserve_learned_ray_then_set_exact_camera_z')
+        # The reference covariance uses the regular target grid, not displaced centers.
+        torch.testing.assert_close(surfaces[0][0,...,0],expected*base_x[0,0,0])
+        torch.testing.assert_close(surfaces[0][0,...,2],expected)
+
     def test_single_face_writes_diagnostics_even_with_large_errors_and_low_alpha(self):
         import torch
         import run_sharp_hard_depth as hard

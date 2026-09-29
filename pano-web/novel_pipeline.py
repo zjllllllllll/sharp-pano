@@ -13,7 +13,7 @@ import time
 import uuid
 import numpy as np
 from PIL import Image
-from novel_geometry import next_camera,merge_faces,six_faces,FACE_NAMES,MASK_COLOR,CAPTURE_VERSION,merge_alpha_holes,ALPHA_THRESHOLD,ALPHA_THRESHOLD_U8
+from novel_geometry import next_camera,merge_faces,six_faces,FACE_NAMES,MASK_COLOR,CAPTURE_VERSION
 from novel_geometry import clean_mask,repair_masks,repair_faces,MASK_CLEANUP
 from novel_composite import COMPOSITE,compose_faces
 
@@ -164,8 +164,9 @@ def capture(job,camera_id,payload,*,folder=None):
         raise ValueError('高斯文件已改变，旧候选场景不可继续截图')
     if len(payload.get('faces',[]))!=6:raise ValueError('需要六个高斯渲染面')
     if payload.get('capture_version')!=CAPTURE_VERSION or len(payload.get('alpha_faces',[]))!=6:
-        raise ValueError('需要保留真实 alpha 的新版六面截图，请刷新页面重新渲染')
+        raise ValueError('需要新版六面截图及质量参照数据，请刷新页面重新渲染')
     frames=[_png(data) for data in payload['faces']]
+    # Render alpha remains an input to quality evaluation; it never expands Mask.
     alpha_rgb=[_png(data) for data in payload['alpha_faces']]
     if any(not np.all(a==a[...,:1]) for a in alpha_rgb):raise ValueError('Alpha PNG must be grayscale')
     alphas=[a[...,0] for a in alpha_rgb]
@@ -174,19 +175,17 @@ def capture(job,camera_id,payload,*,folder=None):
     c=next(c for c in info['cameras'] if c['id']==camera_id)
     with Image.open(mask_source/c['views']['mask']) as image:geometry_mask=np.asarray(image)>0
     if geometry_mask.shape!=panorama.shape[:2]:raise ValueError('Validated Mask dimensions disagree')
-    raw_geometry=geometry_mask.copy();masks=repair_masks(raw_geometry,alphas)
-    geometry_mask=masks['geometry'];alpha_mask=masks['alpha'];mask=masks['combined']
+    raw_geometry=geometry_mask.copy();masks=repair_masks(raw_geometry)
+    geometry_mask=masks['geometry'];mask=masks['combined']
     capture_id=uuid.uuid4().hex[:16]
     relative=f'previews/{camera_id}/{capture_id}'
     output=folder/relative;output.mkdir(parents=True)
     Image.fromarray(panorama).save(output/'raw.png')
     Image.fromarray(mask.astype(np.uint8)*255).save(output/'mask.png')
     Image.fromarray(geometry_mask.astype(np.uint8)*255).save(output/'geometry-mask.png')
-    Image.fromarray(alpha_mask.astype(np.uint8)*255).save(output/'alpha-mask.png')
     Image.fromarray(raw_geometry.astype(np.uint8)*255).save(output/'geometry-mask-raw.png')
-    Image.fromarray(masks['raw_alpha'].astype(np.uint8)*255).save(output/'alpha-mask-raw.png')
     masked=panorama.copy();masked[mask]=MASK_COLOR;Image.fromarray(masked).save(output/'masked.png')
-    faces=repair_faces(panorama,mask,alphas)
+    faces=repair_faces(panorama,mask)
     for index,face in enumerate(faces):
         Image.fromarray(alphas[index]).save(output/f'{face["name"]}-render-alpha.png')
         Image.fromarray(frames[index]).save(output/f'{face["name"]}-render-rgb.png')
@@ -197,17 +196,14 @@ def capture(job,camera_id,payload,*,folder=None):
     result=dict(camera_id=camera_id,revision=manifest['revision'],path=relative,created=time.time(),
         source=manifest['source'],renderer='Spark: actual visible final Gaussian scene; six calibrated FOV100 renders',
         capture_version=CAPTURE_VERSION,mask_color=list(MASK_COLOR),
-        mask_source=manifest['mask_version']+' UNION actual Spark render alpha < 0.70; open3, area16, Gaussian sigma1 and 50-percent contour on component masks, union and final faces',
+        mask_source=manifest['mask_version']+'; geometry only; open3, area16, Gaussian sigma1 and 50-percent contour',
         mask_cleanup=MASK_CLEANUP,raw_geometry_sha256=digest(output/'geometry-mask-raw.png'),
-        before_cleanup_pixels=int((raw_geometry|masks['raw_alpha']).sum()),
-        cleanup_removed_pixels=int(((raw_geometry|masks['raw_alpha'])&~mask).sum()),
-        cleanup_added_pixels=int((mask&~(raw_geometry|masks['raw_alpha'])).sum()),
-        shared_smoothing_pixels=masks['shared_smoothing_pixels'],
-        alpha_threshold=ALPHA_THRESHOLD,alpha_threshold_u8_exclusive=ALPHA_THRESHOLD_U8,geometry_mask_pixels=int(geometry_mask.sum()),
-        alpha_mask_pixels=int(alpha_mask.sum()),alpha_added_pixels=int((alpha_mask&~geometry_mask).sum()),
-        alpha_faces={name:dict(sha256=digest(output/f'{name}-render-alpha.png'),
-            transparent_pixels=int((a<ALPHA_THRESHOLD_U8).sum()),zero_pixels=int((a==0).sum()),
-            quantiles=np.quantile(a,[0,.01,.5,.99,1]).tolist()) for name,a in zip(FACE_NAMES,alphas,strict=True)},
+        before_cleanup_pixels=int(raw_geometry.sum()),
+        cleanup_removed_pixels=int((raw_geometry&~mask).sum()),
+        cleanup_added_pixels=int((mask&~raw_geometry).sum()),
+        geometry_mask_pixels=int(geometry_mask.sum()),
+        alpha_faces={name:dict(sha256=digest(output/f'{name}-render-alpha.png'))
+            for name in FACE_NAMES},
         mask_sha256=digest(output/'mask.png'),
         raw_sha256=digest(output/'raw.png'),mask_fraction=float(mask.mean()),size=[1024,512],faces=list(FACE_NAMES),fov_degrees=100)
     write_json(output/'capture.json',result)
@@ -223,7 +219,7 @@ def begin_repair(job):
         if current['preview'].get('capture_version')!=CAPTURE_VERSION:
             fresh=selection['previews'].get(current['camera_id'])
             if not fresh or fresh.get('capture_version')!=CAPTURE_VERSION:
-                raise ValueError('请重新渲染已确认相机，旧截图缺少真实 alpha')
+                raise ValueError('请重新渲染已确认相机，旧截图使用了过期的 Mask 规则')
             current['preview']=fresh;write_json(folder/'selection.json',selection)
         return current
     cid=state['recommended']
@@ -237,9 +233,9 @@ def begin_repair(job):
     return selection['current']
 
 
-REPAIR_VERSION='single-image-1024-green-alpha070-open3-smooth1-v4'
+REPAIR_VERSION='single-image-1024-green-geometry-open3-smooth1-v5'
 REPAIR_INPUT_SIZE=(1024,1024)
-REPAIR_PROMPT='''执行受约束的 3DGS 图像补洞修复。图中覆盖在缺损位置的纯亮绿色绿幕（RGB 0,255,0，#00FF00）是明确的待修补 Mask，包含未知空间遮挡及 alpha 透明、半透明缺口。绿幕是人工标记，不是场景里的物体、材质、灯光或反射。必须完整替换所有绿幕区域，只修补绿幕及其极小边缘衔接范围；不要根据黑色或白色自行扩大修补范围。真实黑色物体、深色材质和阴影必须保留。不得将绿幕颜色扩散到周围或在结果中残留绿边、绿色反光。
+REPAIR_PROMPT='''执行受约束的 3DGS 图像补洞修复。图中覆盖在缺损位置的纯亮绿色绿幕（RGB 0,255,0，#00FF00）是明确的待修补 Mask，表示几何未知空间遮挡区域。绿幕是人工标记，不是场景里的物体、材质、灯光或反射。必须完整替换所有绿幕区域，只修补绿幕及其极小边缘衔接范围；不要根据黑色或白色自行扩大修补范围。真实黑色物体、深色材质和阴影必须保留。不得将绿幕颜色扩散到周围或在结果中残留绿边、绿色反光。
 只修改确认存在的破洞及其极小边缘衔接范围，其他区域保持原始构图、机位、透视、空间结构、物品、材质、色彩、灯光、反射及装修或施工状态。不得把真实黑色物体、深色材质、阴影、正常开口、白墙或高光误判为破洞。
 修复必须依据破洞四周真实可见的边缘连接、表面走向、颜色、材质、纹理、重复排列、透视、遮挡和物理连接进行连续性补全。与破洞边界直接相交的已有表面、结构、图案或物体，应按照原有方向、尺度和透视向内部延伸；若破洞跨越多个表面，应分别延伸并正确衔接。只有已有物体轮廓明确进入破洞时，才补全该物体缺失的部分；否则只延续周围占主导的背景表面。
 禁止根据场景常识在破洞内新增独立物体、人物、家具、装饰、房间、门窗、镜面、开口或复杂图案。证据不足时采用最近邻的已确认表面、底色和结构进行最简单补全。不得把破洞的原始颜色、形状或外轮廓解释为需要保留的场景内容。
@@ -263,18 +259,18 @@ def repair(job):
     folder=work_folder(job);selection=read(folder/'selection.json');current=selection['current']
     if not current:raise ValueError('No confirmed next camera')
     preview=current['preview'];capture_dir=folder/preview['path']
-    if preview.get('capture_version')!=CAPTURE_VERSION:raise ValueError('请重新渲染，当前旧截图缺少真实 alpha')
+    if preview.get('capture_version')!=CAPTURE_VERSION:raise ValueError('请重新渲染，当前旧截图使用了过期的 Mask 规则')
     if digest(capture_dir/'raw.png')!=preview['raw_sha256'] or digest(capture_dir/'mask.png')!=preview['mask_sha256']:
         raise ValueError('Capture changed after camera confirmation')
     out=capture_dir/'repair';out.mkdir(exist_ok=True)
     config=RepairConfig(prompt=REPAIR_PROMPT,output_size=minimum_seedream_output_size(*REPAIR_INPUT_SIZE))
     request_spec=dict(version=REPAIR_VERSION,model=config.model,prompt=REPAIR_PROMPT,
         image_count=1,input_size=list(REPAIR_INPUT_SIZE),output_size=config.output_size,
-        alpha_threshold=ALPHA_THRESHOLD,mask_cleanup=MASK_CLEANUP)
+        mask_cleanup=MASK_CLEANUP)
     from face_quality_io import assess_rgb
     from face_quality import VERSION as QUALITY_VERSION,POLICY_HASH
-    records=[];models=[];qualities=[]
-    for name in FACE_NAMES:
+    from face_requests import ordered_face_map
+    def repair_face(name):
         base=np.asarray(Image.open(capture_dir/f'{name}.png').convert('RGB'))
         fm=np.asarray(Image.open(capture_dir/f'{name}-mask.png'))>0
         fingerprint=hashlib.sha256(json.dumps(dict(request=request_spec,
@@ -317,8 +313,9 @@ def repair(job):
                 mask_pixels=int(fm.sum()))
         record['model_sha256']=digest(model_path) if fm.any() else None
         write_json(receipt,record)
-        models.append(generated);records.append(record)
-        qualities.append(assess_rgb(capture_dir,name,out))
+        return record,generated,assess_rgb(capture_dir,name,out)
+    repaired=ordered_face_map(repair_face,FACE_NAMES)
+    records=[r[0] for r in repaired];models=[r[1] for r in repaired];qualities=[r[2] for r in repaired]
     face_stats,stats=compose_faces(capture_dir,out,models,qualities)
     for record,values in zip(records,face_stats,strict=True):
         record.update(values,composite=COMPOSITE,sha256=digest(out/f'{record["face"]}-repaired.png'))
@@ -339,7 +336,7 @@ def artifact(job,relative):
     if not parts or not re.fullmatch('[a-f0-9]{16}',parts[0]):raise FileNotFoundError('Invalid revision')
     allowed=(len(parts)==2 and parts[1] in ('cameras.png','camera-map-base.png','sample-cameras.json'))
     if len(parts) in (5,6) and parts[1]=='previews' and CAM_ID.fullmatch(parts[2]) and re.fullmatch('[a-f0-9]{16}',parts[3]):
-        names={'raw.png','masked.png','mask.png','geometry-mask.png','alpha-mask.png','geometry-mask-raw.png','alpha-mask-raw.png','capture.json'}|{f'{f}{s}.png' for f in FACE_NAMES for s in ('','-mask','-masked','-render-alpha','-render-rgb')}
+        names={'raw.png','masked.png','mask.png','geometry-mask.png','geometry-mask-raw.png','capture.json'}|{f'{f}{s}.png' for f in FACE_NAMES for s in ('','-mask','-masked','-render-alpha','-render-rgb')}
         if len(parts)==5:allowed=parts[-1] in names
         elif parts[4]=='repair':
             names={'panorama.png','repair.json','fused-before-composite.png','rgb-support.png','rgb-provenance.png','effective-mask.png','unresolved-mask.png'}

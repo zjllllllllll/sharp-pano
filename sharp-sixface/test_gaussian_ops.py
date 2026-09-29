@@ -1,6 +1,8 @@
 import tempfile
 from pathlib import Path
 import unittest
+from unittest.mock import patch
+from plyfile import PlyData
 import numpy as np
 from geometry import camera,view_rays
 from gaussian_ops import covariance,world_transform,ndc_to_camera,to_vertices,save_vertices
@@ -31,8 +33,10 @@ class GaussianTests(unittest.TestCase):
         scene=self.scene(8); v,info=to_vertices(scene,0)
         with tempfile.TemporaryDirectory() as folder:
             path=Path(folder)/'test.ply'
-            result=save_vertices(path,v)
-            self.assertTrue(result['bit_exact_readback'])
+            with patch.object(PlyData,'read',side_effect=AssertionError('Export must not read back PLY')):
+                result=save_vertices(path,v)
+            self.assertIsNone(result['bit_exact_readback'])
+            np.testing.assert_array_equal(PlyData.read(path)['vertex'].data,v)
             with self.assertRaises(FileExistsError): save_vertices(path,v)
 
 

@@ -39,7 +39,8 @@ def cached_result(job):
 
 def estimate_angles(points, camera_center=(0, 0, 0), *, window=5,
                     min_neighbors=6, max_relative_range_jump=0.10,
-                    max_plane_ratio=0.25, min_tangent_ratio=1e-6, chunk_rows=24):
+                    max_plane_ratio=0.25, min_tangent_ratio=1e-6, chunk_rows=24,
+                    return_normals=False):
     """Return HxW acute normal/ray angles in degrees; -1 means unreliable.
 
     Fit a plane to XYZ values in each pixel window, independently per layer.
@@ -47,6 +48,7 @@ def estimate_angles(points, camera_center=(0, 0, 0), *, window=5,
     accumulated relative to the query point for numerical stability. Reject
     nonplanar and line/point-degenerate neighborhoods. No filling across edges.
     The sign of the eigenvector is irrelevant because we use abs(dot(n, ray)).
+    Optionally return the same fitted normals, with zero for unreliable pixels.
     """
     p = np.asarray(points, dtype=np.float64)
     if p.ndim != 3 or p.shape[2] != 3 or window < 3 or window % 2 != 1:
@@ -62,6 +64,7 @@ def estimate_angles(points, camera_center=(0, 0, 0), *, window=5,
                     constant_values=np.nan)
     padded_range = np.pad(ranges, radius, constant_values=np.nan)
     result = np.full((h, w), -1, dtype=np.float32)
+    normal_grid = np.zeros((h, w, 3), dtype=np.float64) if return_normals else None
     for first in range(0, h, chunk_rows):
         last = min(first + chunk_rows, h)
         center = p[first:last]
@@ -102,7 +105,9 @@ def estimate_angles(points, camera_center=(0, 0, 0), *, window=5,
         cosine = np.clip(np.abs(np.sum(normals * ray, axis=2)), 0, 1)
         angles = np.rad2deg(np.arccos(cosine))
         result[first:last] = np.where(reliable, angles, -1).astype(np.float32)
-    return result
+        if return_normals:
+            normal_grid[first:last] = np.where(reliable[..., None], normals, 0)
+    return (result, normal_grid) if return_normals else result
 
 
 def build_angles(job, progress=print):

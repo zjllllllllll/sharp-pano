@@ -1,5 +1,7 @@
 import io
 import unittest
+import threading
+import time
 import numpy as np
 from PIL import Image
 import novel_pipeline as n
@@ -10,7 +12,7 @@ from test_novel_pipeline import NovelPipelineTests
 class GreenRequestTests(unittest.TestCase):
     def setUp(self):
         fixture=NovelPipelineTests('runTest');fixture.setUp();self.addCleanup(fixture.doCleanups)
-        self.job=fixture.job;self.folder=fixture.folder
+        self.job=fixture.job;self.folder=fixture.folder;self.payload=fixture.payload
         self.preview=n.capture(self.job,'C001',fixture.payload)
         self.baseline=dict(revision=fixture.rev,camera_id='C001',capture=self.preview,
             image='old-image.png',comparison_variants=[])
@@ -39,6 +41,54 @@ class GreenRequestTests(unittest.TestCase):
         def unavailable_provider():raise AssertionError('Cached images must not require live credentials')
         generate(self.job,self.preview,self.baseline,mock_request,decode,None,ConnectionError,unavailable_provider)
         self.assertEqual(len(calls),count)
+
+    def all_faces_capture(self):
+        Image.new('L',(1024,512),255).save(self.job/'mask.png')
+        self.preview=n.capture(self.job,'C001',self.payload)
+        self.baseline['capture']=self.preview
+
+    def test_three_parallel_requests_keep_face_order_and_resume_receipts(self):
+        self.all_faces_capture()
+        barrier=threading.Barrier(3);lock=threading.Lock()
+        calls=[];active=0;peak=0
+        def request(path,out,*args,**kwargs):
+            nonlocal active,peak
+            face=path.name.removesuffix('-api-input.png')
+            with lock:
+                calls.append(face);active+=1;peak=max(peak,active)
+            try:
+                barrier.wait(timeout=10)
+                time.sleep(.01*(6-n.FACE_NAMES.index(face)))
+                Image.new('RGB',(2048,2048),(123,100,80)).save(out/'api_original.image',format='PNG')
+            finally:
+                with lock:active-=1
+        decode=lambda data:Image.open(io.BytesIO(data))
+        first=generate(self.job,self.preview,self.baseline,request,decode,'fixture',ConnectionError)
+        self.assertEqual(peak,3);self.assertCountEqual(calls,n.FACE_NAMES)
+        self.assertEqual([r['face'] for r in first['faces']],list(n.FACE_NAMES))
+        self.assertEqual([r['face'] for r in first['quality_faces']],list(n.FACE_NAMES))
+        again=generate(self.job,self.preview,self.baseline,request,decode,None,ConnectionError,
+                       lambda: self.fail('Cached faces must not need credentials'))
+        self.assertEqual(len(calls),6);self.assertEqual(first['image_sha256'],again['image_sha256'])
+
+    def test_parallel_failure_keeps_successful_faces_and_never_resubmits(self):
+        self.all_faces_capture();calls=[];barrier=threading.Barrier(3)
+        def request(path,out,*args,**kwargs):
+            face=path.name.removesuffix('-api-input.png');calls.append(face)
+            barrier.wait(timeout=10)
+            if face=='front':raise RuntimeError('uncertain provider outcome')
+            time.sleep(.05)
+            Image.new('RGB',(2048,2048),(123,100,80)).save(out/'api_original.image',format='PNG')
+        decode=lambda data:Image.open(io.BytesIO(data))
+        with self.assertRaisesRegex(RuntimeError,'uncertain'):
+            generate(self.job,self.preview,self.baseline,request,decode,'fixture',ConnectionError)
+        self.assertCountEqual(calls,list(n.FACE_NAMES)[:3])
+        out=self.folder/self.preview['path']/'repair'
+        self.assertTrue((out/'right.json').exists());self.assertTrue((out/'back.json').exists())
+        before=list(calls)
+        with self.assertRaisesRegex(RuntimeError,'uncertain'):
+            generate(self.job,self.preview,self.baseline,request,decode,'fixture',ConnectionError)
+        self.assertEqual(calls,before)
 
     def test_uncertain_post_is_never_repeated_and_tampered_alpha_fails(self):
         count=[]

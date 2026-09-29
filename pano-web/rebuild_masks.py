@@ -27,13 +27,13 @@ def rebuild(job):
     if prior.get('mask_update_pending') and current['preview'].get('capture_version')==n.CAPTURE_VERSION:
         return prior['mask_update_pending']
     run_id=uuid.uuid4().hex
-    backup=job/'reruns'/('mask70-smooth1-'+time.strftime('%Y%m%d-%H%M%S')+'-'+run_id[:6])
+    backup=job/'reruns'/('geometry-mask-smooth1-'+time.strftime('%Y%m%d-%H%M%S')+'-'+run_id[:6])
     backup.mkdir(parents=True)
     for name in ('job.json','stage-6.json','stage-7.json','stage-8.json','stage-9.json'):
         if (job/name).exists():shutil.copy2(job/name,backup/name)
     shutil.copy2(old_folder/'selection.json',backup/'selection.json')
     running=deepcopy(prior);running.update(busy=True,running_stage=None,error=None,
-        mask_update_run=run_id,message='正在更新 Mask 边缘平滑（不调用模型）')
+        mask_update_run=run_id,message='正在更新几何 Mask 及边缘平滑（不调用模型）')
     n.write_json(job/'job.json',running)
     try:
         stage6=n.prepare(job);folder=job/'novel'/stage6['revision']
@@ -60,7 +60,7 @@ def rebuild(job):
             face_counts={face:int((np.asarray(Image.open(target/f'{face}-mask.png'))>0).sum()) for face in n.FACE_NAMES}
             reports.append(dict(camera_id=cid,old_capture=old['path'],new_capture=preview['path'],
                 old_mask_pixels=round(old['mask_fraction']*1024*512),
-                threshold70_before_cleanup=preview['before_cleanup_pixels'],
+                geometry_before_cleanup=preview['before_cleanup_pixels'],
                 mask_pixels=round(preview['mask_fraction']*1024*512),mask_fraction=preview['mask_fraction'],
                 cleanup_removed_pixels=preview['cleanup_removed_pixels'],face_mask_pixels=face_counts))
             reports[-1].update(added_vs_previous=int((new_mask&~old_mask).sum()),
@@ -76,11 +76,11 @@ def rebuild(job):
             raise ValueError('Job changed during mask rebuild; outputs retained, not published')
         stage6=n.public_state(job,folder)
         pending=dict(revision=stage6['revision'],camera_id=cid,capture=captures[cid],
-            backup=str(backup),alpha_threshold=.70,mask_cleanup=n.MASK_CLEANUP,
+            backup=str(backup),mask_cleanup=n.MASK_CLEANUP,
             models_called=False,previous_revision=old_folder.name)
         state['stages']={k:v for k,v in state['stages'].items() if int(k)<7};state['stages']['6']=stage6
         state.update(busy=False,running_stage=None,error=None,mask_update_pending=pending,
-            message='70% alpha Mask 已完成边缘平滑；未运行第七至九步模型')
+            message='几何 Mask 已完成边缘平滑；未运行第七至九步模型')
         state.pop('mask_update_run',None)
         n.write_json(job/'stage-6.json',stage6)
         # Backups already exist. Retire stale stage records so standalone tools
